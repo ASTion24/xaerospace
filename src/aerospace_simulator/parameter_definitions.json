@@ -1,0 +1,1705 @@
+{
+  "version": 1,
+  "sections": {
+    "identity": {
+      "zh-CN": {
+        "label": "合同与模型标识",
+        "help": "由系统用于识别合同版本、物理模型和执行后端，首次使用无需修改。"
+      },
+      "en": {
+        "label": "Contract and Model Identity",
+        "help": "System identifiers for the contract version, physics model, and backend. No changes are needed for a first run."
+      }
+    },
+    "environment": {
+      "zh-CN": {
+        "label": "环境条件",
+        "help": "设置仿真起点的位置、大气和风场条件。"
+      },
+      "en": {
+        "label": "Environment",
+        "help": "Location, atmosphere, and wind conditions at the start of the simulation."
+      }
+    },
+    "vehicle": {
+      "zh-CN": {
+        "label": "飞行器参数",
+        "help": "描述火箭或航天器的质量、尺寸、载荷和阻力特性。"
+      },
+      "en": {
+        "label": "Flight Vehicle",
+        "help": "Mass, payload, geometry, and drag properties of the flight vehicle."
+      }
+    },
+    "motor": {
+      "zh-CN": {
+        "label": "发动机与推进剂",
+        "help": "设置推力随时间的变化、发动机质量和燃烧时间。"
+      },
+      "en": {
+        "label": "Motor and Propellant",
+        "help": "Motor mass, propellant, burn duration, and thrust history."
+      }
+    },
+    "rigid_body": {
+      "zh-CN": {
+        "label": "六自由度刚体模型",
+        "help": "高级结构与气动参数，决定火箭姿态、转动和气动力矩。"
+      },
+      "en": {
+        "label": "6DOF Rigid Body",
+        "help": "Advanced structural and aerodynamic properties governing attitude, rotation, and moments."
+      }
+    },
+    "recovery": {
+      "zh-CN": {
+        "label": "降落伞回收",
+        "help": "设置减速伞、主伞及其触发条件；数组中每一项代表一顶降落伞。"
+      },
+      "en": {
+        "label": "Parachute Recovery",
+        "help": "Drogue and main parachutes with deployment triggers. Each array item defines one canopy."
+      }
+    },
+    "launch": {
+      "zh-CN": {
+        "label": "发射条件",
+        "help": "设置发射导轨、发射方向和仿真终止时间。"
+      },
+      "en": {
+        "label": "Launch Conditions",
+        "help": "Launch rail, departure direction, and simulation time limits."
+      }
+    },
+    "launch_site": {
+      "zh-CN": {
+        "label": "轨道发射场",
+        "help": "设置运载火箭起飞位置、发射历元和初始离地速度；地球自转速度会自动计入。"
+      },
+      "en": {
+        "label": "Orbital Launch Site",
+        "help": "Launch location, epoch, and initial clearance speed. Earth-rotation velocity is included automatically."
+      }
+    },
+    "stages": {
+      "zh-CN": {
+        "label": "两级火箭与制导",
+        "help": "按顺序定义两级火箭的干质量、推进剂、推力、比冲、燃烧时间和俯仰程序。"
+      },
+      "en": {
+        "label": "Two Stages and Guidance",
+        "help": "Ordered stage dry mass, propellant, thrust, specific impulse, burn duration, and pitch program."
+      }
+    },
+    "target_orbit": {
+      "zh-CN": {
+        "label": "目标轨道验收",
+        "help": "定义入轨近地点、远地点和偏心率必须满足的物理验收范围。"
+      },
+      "en": {
+        "label": "Target Orbit Acceptance",
+        "help": "Physical acceptance bounds for insertion periapsis, apoapsis, and eccentricity."
+      }
+    },
+    "output": {
+      "zh-CN": {
+        "label": "结果采样",
+        "help": "控制结果记录频率；间隔越小，曲线越细，数据量也越大。"
+      },
+      "en": {
+        "label": "Output Sampling",
+        "help": "Controls result recording. Smaller intervals give denser curves and larger output."
+      }
+    },
+    "frame": {
+      "zh-CN": {
+        "label": "参考坐标系",
+        "help": "定义轨道位置、速度和方向采用的参考系，由当前模型固定。"
+      },
+      "en": {
+        "label": "Reference Frame",
+        "help": "Reference frame used for orbital position, velocity, and orientation. Fixed by the selected model."
+      }
+    },
+    "central_body": {
+      "zh-CN": {
+        "label": "中心天体",
+        "help": "地球引力和形状常数，由当前轨道模型固定。"
+      },
+      "en": {
+        "label": "Central Body",
+        "help": "Earth gravity and shape constants fixed by the selected orbit model."
+      }
+    },
+    "spacecraft": {
+      "zh-CN": {
+        "label": "航天器属性",
+        "help": "设置航天器质量、名称和转动惯量。"
+      },
+      "en": {
+        "label": "Spacecraft",
+        "help": "Spacecraft name, mass, and rotational inertia."
+      }
+    },
+    "aerodynamics": {
+      "zh-CN": {
+        "label": "轨道气动力",
+        "help": "启用大气阻力时使用的迎风面积、阻力系数和指数大气参数。"
+      },
+      "en": {
+        "label": "Orbital Aerodynamics",
+        "help": "Reference area, drag coefficient, and exponential atmosphere used when drag is enabled."
+      }
+    },
+    "initial_state": {
+      "zh-CN": {
+        "label": "初始状态",
+        "help": "设置仿真开始时的轨道、姿态或角速度。"
+      },
+      "en": {
+        "label": "Initial State",
+        "help": "Orbit, attitude, or angular velocity at simulation start."
+      }
+    },
+    "propagation": {
+      "zh-CN": {
+        "label": "传播与时间设置",
+        "help": "设置仿真时长、积分步长和结果输出间隔。"
+      },
+      "en": {
+        "label": "Propagation and Timing",
+        "help": "Simulation duration, integration step, and output interval."
+      }
+    },
+    "aircraft": {
+      "zh-CN": {
+        "label": "飞机型号",
+        "help": "所选 JSBSim 飞机模型由任务变体决定。"
+      },
+      "en": {
+        "label": "Aircraft Model",
+        "help": "The JSBSim aircraft model selected by the task variant."
+      }
+    },
+    "initial_condition": {
+      "zh-CN": {
+        "label": "初始飞行条件",
+        "help": "设置飞机开始仿真时的位置、空速、航迹角和航向。"
+      },
+      "en": {
+        "label": "Initial Flight Condition",
+        "help": "Aircraft position, airspeed, flight-path angle, and heading at simulation start."
+      }
+    },
+    "trim": {
+      "zh-CN": {
+        "label": "配平方式",
+        "help": "仿真开始前求解稳定飞行状态，当前使用纵向配平。"
+      },
+      "en": {
+        "label": "Trim",
+        "help": "Solves a steady flight condition before propagation. Longitudinal trim is currently used."
+      }
+    },
+    "controls": {
+      "zh-CN": {
+        "label": "操纵输入",
+        "help": "相对于配平值施加副翼、升降舵、方向舵和油门时序。"
+      },
+      "en": {
+        "label": "Control Inputs",
+        "help": "Aileron, elevator, rudder, and throttle schedules relative to trim."
+      }
+    },
+    "gnc": {
+      "zh-CN": {
+        "label": "制导、导航与控制",
+        "help": "设置姿态目标、控制器和反馈增益。"
+      },
+      "en": {
+        "label": "Guidance, Navigation, and Control",
+        "help": "Attitude target, controller selection, and feedback gains."
+      }
+    },
+    "reaction_wheels": {
+      "zh-CN": {
+        "label": "反作用轮",
+        "help": "设置三轴反作用轮的安装方向、初始转速和能力上限。"
+      },
+      "en": {
+        "label": "Reaction Wheels",
+        "help": "Three-axis wheel alignment, initial speeds, and actuator limits."
+      }
+    }
+  },
+  "fields": {
+    "schema_version": {
+      "zh-CN": {
+        "label": "合同版本",
+        "help": "决定服务器如何解析这份合同，由系统固定。"
+      },
+      "en": {
+        "label": "Contract Version",
+        "help": "Selects the server-side contract parser and is fixed by the system."
+      },
+      "unit": ""
+    },
+    "name": {
+      "zh-CN": {
+        "label": "任务名称",
+        "help": "用于在队列和结果中识别本次仿真，可改成容易记忆的名称。"
+      },
+      "en": {
+        "label": "Task Name",
+        "help": "Identifies this simulation in the queue and results."
+      },
+      "unit": ""
+    },
+    "central_body.name": {
+      "zh-CN": {
+        "label": "中心天体",
+        "help": "当前轨道传播所环绕的天体，由模型固定为地球。"
+      },
+      "en": {
+        "label": "Central Body",
+        "help": "Body orbited by the propagated spacecraft. Fixed to Earth."
+      },
+      "unit": ""
+    },
+    "spacecraft.name": {
+      "zh-CN": {
+        "label": "航天器名称",
+        "help": "用于在轨道结果中识别航天器。"
+      },
+      "en": {
+        "label": "Spacecraft Name",
+        "help": "Identifies the spacecraft in orbit results."
+      },
+      "unit": ""
+    },
+    "description": {
+      "zh-CN": {
+        "label": "任务说明",
+        "help": "简要记录本次仿真的目的和条件。"
+      },
+      "en": {
+        "label": "Task Description",
+        "help": "A short description of the simulation purpose and conditions."
+      },
+      "unit": ""
+    },
+    "backend": {
+      "zh-CN": {
+        "label": "仿真后端",
+        "help": "实际执行物理计算的开源软件，由任务族固定。"
+      },
+      "en": {
+        "label": "Simulation Backend",
+        "help": "The open-source physics engine executing the task. Fixed by the task family."
+      },
+      "unit": ""
+    },
+    "dynamics": {
+      "zh-CN": {
+        "label": "动力学模型",
+        "help": "决定使用哪一种经过验证的物理模型，由任务变体固定。"
+      },
+      "en": {
+        "label": "Dynamics Model",
+        "help": "The validated physics model selected by the task variant."
+      },
+      "unit": ""
+    },
+    "latitude_deg": {
+      "zh-CN": {
+        "label": "纬度",
+        "help": "位置的南北坐标；北纬为正，南纬为负。"
+      },
+      "en": {
+        "label": "Latitude",
+        "help": "North-south coordinate. North is positive and south is negative."
+      },
+      "unit": "°",
+      "min": -90,
+      "max": 90
+    },
+    "longitude_deg": {
+      "zh-CN": {
+        "label": "经度",
+        "help": "位置的东西坐标；东经为正，西经为负。"
+      },
+      "en": {
+        "label": "Longitude",
+        "help": "East-west coordinate. East is positive and west is negative."
+      },
+      "unit": "°",
+      "min": -180,
+      "max": 180
+    },
+    "elevation_m": {
+      "zh-CN": {
+        "label": "场地海拔",
+        "help": "发射场相对平均海平面的高度。"
+      },
+      "en": {
+        "label": "Site Elevation",
+        "help": "Launch-site height above mean sea level."
+      },
+      "unit": "m"
+    },
+    "atmospheric_model": {
+      "zh-CN": {
+        "label": "大气模型",
+        "help": "用于计算空气密度和阻力，当前固定为标准大气。"
+      },
+      "en": {
+        "label": "Atmosphere Model",
+        "help": "Computes air density and drag. The standard atmosphere is currently fixed."
+      },
+      "unit": ""
+    },
+    "atmosphere": {
+      "zh-CN": {
+        "label": "大气模型",
+        "help": "用于飞机配平和飞行计算，当前固定为 1976 美国标准大气。"
+      },
+      "en": {
+        "label": "Atmosphere Model",
+        "help": "Used for aircraft trim and flight calculations. Fixed to the 1976 U.S. Standard Atmosphere."
+      },
+      "unit": ""
+    },
+    "radius_m": {
+      "zh-CN": {
+        "label": "箭体半径",
+        "help": "火箭圆柱箭体的外半径，用于计算迎风面积。"
+      },
+      "en": {
+        "label": "Body Radius",
+        "help": "Outer radius of the cylindrical rocket body, used for reference area."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "dry_mass_without_motor_kg": {
+      "zh-CN": {
+        "label": "箭体干质量",
+        "help": "不含发动机和推进剂的火箭质量。"
+      },
+      "en": {
+        "label": "Airframe Dry Mass",
+        "help": "Rocket mass excluding motor and propellant."
+      },
+      "unit": "kg",
+      "min": 0,
+      "minExclusive": true
+    },
+    "center_of_mass_without_motor_m": {
+      "zh-CN": {
+        "label": "箭体质心位置",
+        "help": "不含发动机时，箭体质心在机体坐标轴上的位置。"
+      },
+      "en": {
+        "label": "Airframe Center of Mass",
+        "help": "Airframe center-of-mass position along the body axis without the motor."
+      },
+      "unit": "m"
+    },
+    "drag_coefficient_power_on": {
+      "zh-CN": {
+        "label": "发动机工作时阻力系数",
+        "help": "发动机燃烧阶段使用的无量纲轴向阻力系数。"
+      },
+      "en": {
+        "label": "Powered Drag Coefficient",
+        "help": "Dimensionless axial drag coefficient while the motor is burning."
+      },
+      "unit": "",
+      "min": 0,
+      "minExclusive": true
+    },
+    "drag_coefficient_power_off": {
+      "zh-CN": {
+        "label": "发动机关闭后阻力系数",
+        "help": "燃烧结束后使用的无量纲轴向阻力系数。"
+      },
+      "en": {
+        "label": "Coast Drag Coefficient",
+        "help": "Dimensionless axial drag coefficient after motor burnout."
+      },
+      "unit": "",
+      "min": 0,
+      "minExclusive": true
+    },
+    "weathercock_coefficient": {
+      "zh-CN": {
+        "label": "风标效应系数",
+        "help": "三自由度模型中用于近似火箭迎风转向趋势；0 表示不启用。"
+      },
+      "en": {
+        "label": "Weathercock Coefficient",
+        "help": "Approximates the tendency to turn into the wind in 3DOF. Zero disables it."
+      },
+      "unit": "",
+      "min": 0
+    },
+    "thrust_curve": {
+      "zh-CN": {
+        "label": "推力曲线",
+        "help": "按 [[时间（秒）, 推力（牛）], ...] 填写，时间必须递增。"
+      },
+      "en": {
+        "label": "Thrust Curve",
+        "help": "Enter [[time in seconds, thrust in newtons], ...] with strictly increasing time."
+      },
+      "unit": "s, N"
+    },
+    "dry_mass_kg": {
+      "zh-CN": {
+        "label": "发动机干质量",
+        "help": "发动机燃烧完毕后仍保留的结构质量。"
+      },
+      "en": {
+        "label": "Motor Dry Mass",
+        "help": "Motor structural mass remaining after burnout."
+      },
+      "unit": "kg",
+      "min": 0,
+      "minExclusive": true
+    },
+    "propellant_initial_mass_kg": {
+      "zh-CN": {
+        "label": "初始推进剂质量",
+        "help": "点火时发动机内可消耗推进剂的质量。"
+      },
+      "en": {
+        "label": "Initial Propellant Mass",
+        "help": "Consumable propellant mass at ignition."
+      },
+      "unit": "kg",
+      "min": 0,
+      "minExclusive": true
+    },
+    "burn_time_s": {
+      "zh-CN": {
+        "label": "燃烧时间",
+        "help": "从点火到推力结束的持续时间，应与推力曲线终点一致。"
+      },
+      "en": {
+        "label": "Burn Duration",
+        "help": "Time from ignition to thrust termination. It should match the thrust-curve endpoint."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "rail_length_m": {
+      "zh-CN": {
+        "label": "发射导轨长度",
+        "help": "火箭受到导轨方向约束的距离。"
+      },
+      "en": {
+        "label": "Launch Rail Length",
+        "help": "Distance over which the rocket remains constrained by the launch rail."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "inclination_deg": {
+      "zh-CN": {
+        "label": "倾角",
+        "help": "相对于参考平面的倾斜角度。"
+      },
+      "en": {
+        "label": "Inclination",
+        "help": "Inclination relative to the applicable reference plane."
+      },
+      "unit": "°"
+    },
+    "initial_state.inclination_deg": {
+      "zh-CN": {
+        "label": "轨道倾角",
+        "help": "轨道面与地球赤道面的夹角；90° 为极轨，接近 0° 为赤道轨道。"
+      },
+      "en": {
+        "label": "Orbital Inclination",
+        "help": "Angle between the orbital plane and Earth equator. 90° is polar and near 0° is equatorial."
+      },
+      "unit": "°",
+      "min": 0.1,
+      "max": 179.9
+    },
+    "launch.inclination_deg": {
+      "zh-CN": {
+        "label": "发射仰角",
+        "help": "发射导轨相对水平面的角度；90° 表示竖直向上。"
+      },
+      "en": {
+        "label": "Launch Elevation Angle",
+        "help": "Launch-rail angle above the horizontal. 90° is vertical."
+      },
+      "unit": "°",
+      "min": 0,
+      "max": 90,
+      "minExclusive": true,
+      "inputMin": 0.001
+    },
+    "heading_deg": {
+      "zh-CN": {
+        "label": "航向角",
+        "help": "从正北顺时针量取；90° 为正东，180° 为正南。"
+      },
+      "en": {
+        "label": "Heading",
+        "help": "Measured clockwise from north. 90° is east and 180° is south."
+      },
+      "unit": "°",
+      "min": 0,
+      "max": 360,
+      "maxExclusive": true,
+      "inputMax": 359.999
+    },
+    "max_time_s": {
+      "zh-CN": {
+        "label": "最大飞行时间",
+        "help": "仿真超过该时间仍未自然结束时将停止计算。"
+      },
+      "en": {
+        "label": "Maximum Flight Time",
+        "help": "Stops propagation if the flight has not ended naturally by this time."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "max_time_step_s": {
+      "zh-CN": {
+        "label": "最大积分步长",
+        "help": "求解器允许采用的最大时间步；越小通常越精细但更慢。"
+      },
+      "en": {
+        "label": "Maximum Solver Step",
+        "help": "Largest solver time step. Smaller values are usually more detailed but slower."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "sample_interval_s": {
+      "zh-CN": {
+        "label": "结果采样间隔",
+        "help": "每隔多长时间保存一个结果点。"
+      },
+      "en": {
+        "label": "Result Sample Interval",
+        "help": "Time between recorded result samples."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "coordinate_system_orientation": {
+      "zh-CN": {
+        "label": "机体坐标方向",
+        "help": "定义机体轴的正方向，由 RocketPy 模型约定固定。"
+      },
+      "en": {
+        "label": "Body-Axis Orientation",
+        "help": "Defines positive body-axis directions and is fixed by the RocketPy model convention."
+      },
+      "unit": ""
+    },
+    "vehicle_dry_inertia_kg_m2": {
+      "zh-CN": {
+        "label": "箭体主惯量",
+        "help": "不含发动机的箭体三个主惯量 [Ixx, Iyy, Izz]。"
+      },
+      "en": {
+        "label": "Airframe Principal Inertia",
+        "help": "Three principal moments [Ixx, Iyy, Izz] without the motor."
+      },
+      "unit": "kg·m²"
+    },
+    "dry_inertia_kg_m2": {
+      "zh-CN": {
+        "label": "发动机干惯量",
+        "help": "燃烧后发动机的三个主惯量 [Ixx, Iyy, Izz]。"
+      },
+      "en": {
+        "label": "Motor Dry Inertia",
+        "help": "Motor principal moments [Ixx, Iyy, Izz] after burnout."
+      },
+      "unit": "kg·m²"
+    },
+    "motor_position_m": {
+      "zh-CN": {
+        "label": "发动机安装位置",
+        "help": "发动机相对火箭机体坐标原点的位置。"
+      },
+      "en": {
+        "label": "Motor Position",
+        "help": "Motor location relative to the rocket body origin."
+      },
+      "unit": "m"
+    },
+    "chamber_radius_m": {
+      "zh-CN": {
+        "label": "燃烧室半径",
+        "help": "用于估算推进剂质量分布和转动惯量。"
+      },
+      "en": {
+        "label": "Chamber Radius",
+        "help": "Used to estimate propellant mass distribution and inertia."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "chamber_height_m": {
+      "zh-CN": {
+        "label": "燃烧室长度",
+        "help": "用于估算推进剂质量分布和转动惯量。"
+      },
+      "en": {
+        "label": "Chamber Length",
+        "help": "Used to estimate propellant mass distribution and inertia."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "chamber_position_m": {
+      "zh-CN": {
+        "label": "燃烧室位置",
+        "help": "燃烧室中心在发动机坐标轴上的位置。"
+      },
+      "en": {
+        "label": "Chamber Position",
+        "help": "Chamber-center position along the motor axis."
+      },
+      "unit": "m"
+    },
+    "nozzle_radius_m": {
+      "zh-CN": {
+        "label": "喷管出口半径",
+        "help": "发动机喷管出口的有效半径。"
+      },
+      "en": {
+        "label": "Nozzle Exit Radius",
+        "help": "Effective radius of the motor nozzle exit."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "center_of_dry_mass_position_m": {
+      "zh-CN": {
+        "label": "发动机干质心位置",
+        "help": "发动机不含推进剂时的质心位置。"
+      },
+      "en": {
+        "label": "Motor Dry Center of Mass",
+        "help": "Motor center-of-mass position without propellant."
+      },
+      "unit": "m"
+    },
+    "nozzle_position_m": {
+      "zh-CN": {
+        "label": "喷管位置",
+        "help": "喷管出口在发动机坐标轴上的位置。"
+      },
+      "en": {
+        "label": "Nozzle Position",
+        "help": "Nozzle-exit position along the motor axis."
+      },
+      "unit": "m"
+    },
+    "kind": {
+      "zh-CN": {
+        "label": "类型",
+        "help": "选择该部件或触发条件的已支持类型。"
+      },
+      "en": {
+        "label": "Type",
+        "help": "Selects the supported component or trigger type."
+      },
+      "unit": ""
+    },
+    "rigid_body.nose.kind": {
+      "zh-CN": {
+        "label": "头锥外形",
+        "help": "头锥的几何类型，用于计算气动力。"
+      },
+      "en": {
+        "label": "Nose Shape",
+        "help": "Nose geometry used by the aerodynamic model."
+      },
+      "unit": ""
+    },
+    "count": {
+      "zh-CN": {
+        "label": "数量",
+        "help": "安装的相同部件数量。"
+      },
+      "en": {
+        "label": "Count",
+        "help": "Number of identical installed components."
+      },
+      "unit": "",
+      "min": 0,
+      "step": 1
+    },
+    "rigid_body.fins.count": {
+      "zh-CN": {
+        "label": "尾翼数量",
+        "help": "均匀安装在箭体周围的尾翼数量，至少为 3。"
+      },
+      "en": {
+        "label": "Fin Count",
+        "help": "Number of fins distributed around the body. At least three are required."
+      },
+      "unit": "",
+      "min": 3,
+      "step": 1
+    },
+    "length_m": {
+      "zh-CN": {
+        "label": "长度",
+        "help": "部件沿火箭轴向的长度。"
+      },
+      "en": {
+        "label": "Length",
+        "help": "Component length along the rocket axis."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "position_m": {
+      "zh-CN": {
+        "label": "安装位置",
+        "help": "部件在火箭机体坐标轴上的安装位置。"
+      },
+      "en": {
+        "label": "Installation Position",
+        "help": "Component installation location along the rocket body axis."
+      },
+      "unit": "m"
+    },
+    "root_chord_m": {
+      "zh-CN": {
+        "label": "翼根弦长",
+        "help": "尾翼与箭体连接处的弦长。"
+      },
+      "en": {
+        "label": "Fin Root Chord",
+        "help": "Fin chord length where it joins the body."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "tip_chord_m": {
+      "zh-CN": {
+        "label": "翼尖弦长",
+        "help": "尾翼外侧翼尖处的弦长。"
+      },
+      "en": {
+        "label": "Fin Tip Chord",
+        "help": "Fin chord length at the outer tip."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "span_m": {
+      "zh-CN": {
+        "label": "尾翼展长",
+        "help": "尾翼从箭体表面向外伸出的距离。"
+      },
+      "en": {
+        "label": "Fin Span",
+        "help": "Distance the fin extends outward from the body."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "cant_angle_deg": {
+      "zh-CN": {
+        "label": "尾翼偏转角",
+        "help": "尾翼绕径向轴的安装偏角，会产生滚转力矩。"
+      },
+      "en": {
+        "label": "Fin Cant Angle",
+        "help": "Fin installation angle about its radial axis, producing roll moment."
+      },
+      "unit": "°",
+      "min": -45,
+      "max": 45
+    },
+    "top_radius_m": {
+      "zh-CN": {
+        "label": "尾锥前端半径",
+        "help": "尾锥靠近箭体一端的半径。"
+      },
+      "en": {
+        "label": "Tail Top Radius",
+        "help": "Tail-cone radius at the body-side end."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "bottom_radius_m": {
+      "zh-CN": {
+        "label": "尾锥后端半径",
+        "help": "尾锥靠近发动机喷口一端的半径。"
+      },
+      "en": {
+        "label": "Tail Bottom Radius",
+        "help": "Tail-cone radius at the aft end."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "upper_position_m": {
+      "zh-CN": {
+        "label": "上导轨扣位置",
+        "help": "上方导轨扣在机体轴上的安装位置。"
+      },
+      "en": {
+        "label": "Upper Rail Button Position",
+        "help": "Upper rail-button location along the body axis."
+      },
+      "unit": "m"
+    },
+    "lower_position_m": {
+      "zh-CN": {
+        "label": "下导轨扣位置",
+        "help": "下方导轨扣在机体轴上的安装位置。"
+      },
+      "en": {
+        "label": "Lower Rail Button Position",
+        "help": "Lower rail-button location along the body axis."
+      },
+      "unit": "m"
+    },
+    "angular_position_deg": {
+      "zh-CN": {
+        "label": "导轨扣周向角",
+        "help": "导轨扣绕箭体轴线的周向安装角。"
+      },
+      "en": {
+        "label": "Rail Button Azimuth",
+        "help": "Rail-button angular location around the rocket body axis."
+      },
+      "unit": "°",
+      "min": 0,
+      "max": 360,
+      "maxExclusive": true,
+      "inputMax": 359.999
+    },
+    "parachutes": {
+      "zh-CN": {
+        "label": "降落伞列表",
+        "help": "JSON 数组。每顶伞包含名称、CdS、触发条件、采样频率和展开延迟。"
+      },
+      "en": {
+        "label": "Parachute List",
+        "help": "JSON array. Each canopy defines an id, CdS, trigger, sampling rate, and deployment lag."
+      },
+      "unit": ""
+    },
+    "frame": {
+      "zh-CN": {
+        "label": "参考坐标系",
+        "help": "轨道状态采用的惯性参考系，当前固定为 J2000。"
+      },
+      "en": {
+        "label": "Reference Frame",
+        "help": "Inertial frame used for orbit states. Currently fixed to J2000."
+      },
+      "unit": ""
+    },
+    "gravitational_parameter_m3_s2": {
+      "zh-CN": {
+        "label": "地球标准引力参数",
+        "help": "地球质量与万有引力常数的乘积，由模型固定。"
+      },
+      "en": {
+        "label": "Earth Gravitational Parameter",
+        "help": "Product of Earth mass and gravitational constant, fixed by the model."
+      },
+      "unit": "m³/s²"
+    },
+    "equatorial_radius_m": {
+      "zh-CN": {
+        "label": "地球赤道半径",
+        "help": "地球参考椭球的赤道半径，由模型固定。"
+      },
+      "en": {
+        "label": "Earth Equatorial Radius",
+        "help": "Equatorial radius of the Earth reference ellipsoid, fixed by the model."
+      },
+      "unit": "m"
+    },
+    "j2": {
+      "zh-CN": {
+        "label": "地球 J2 系数",
+        "help": "描述地球扁率的二阶带谐系数，由模型固定。"
+      },
+      "en": {
+        "label": "Earth J2 Coefficient",
+        "help": "Second zonal harmonic representing Earth oblateness, fixed by the model."
+      },
+      "unit": ""
+    },
+    "rotation_rate_rad_s": {
+      "zh-CN": {
+        "label": "地球自转角速度",
+        "help": "地球绕自转轴的角速度，由模型固定。"
+      },
+      "en": {
+        "label": "Earth Rotation Rate",
+        "help": "Earth angular rotation rate, fixed by the model."
+      },
+      "unit": "rad/s"
+    },
+    "mass_kg": {
+      "zh-CN": {
+        "label": "航天器质量",
+        "help": "用于平动或姿态动力学计算的航天器总质量。"
+      },
+      "en": {
+        "label": "Spacecraft Mass",
+        "help": "Total spacecraft mass used by translational or attitude dynamics."
+      },
+      "unit": "kg",
+      "min": 0,
+      "minExclusive": true
+    },
+    "enabled": {
+      "zh-CN": {
+        "label": "是否启用",
+        "help": "打开或关闭当前模型功能。"
+      },
+      "en": {
+        "label": "Enabled",
+        "help": "Turns the associated model feature on or off."
+      },
+      "unit": ""
+    },
+    "aerodynamics.enabled": {
+      "zh-CN": {
+        "label": "启用大气阻力",
+        "help": "打开后在 J2 轨道传播中计算指数大气阻力。"
+      },
+      "en": {
+        "label": "Enable Atmospheric Drag",
+        "help": "Adds exponential-atmosphere drag to J2 orbit propagation."
+      },
+      "unit": ""
+    },
+    "gnc.enabled": {
+      "zh-CN": {
+        "label": "启用姿态控制",
+        "help": "打开后由反作用轮执行闭环姿态或角速度控制。"
+      },
+      "en": {
+        "label": "Enable Attitude Control",
+        "help": "Enables closed-loop attitude or rate control using reaction wheels."
+      },
+      "unit": ""
+    },
+    "reference_area_m2": {
+      "zh-CN": {
+        "label": "气动参考面积",
+        "help": "航天器迎风投影面积，用于计算轨道阻力。"
+      },
+      "en": {
+        "label": "Aerodynamic Reference Area",
+        "help": "Projected area normal to the flow, used for orbital drag."
+      },
+      "unit": "m²",
+      "min": 0,
+      "minExclusive": true
+    },
+    "drag_coefficient": {
+      "zh-CN": {
+        "label": "阻力系数",
+        "help": "描述外形阻力强弱的无量纲系数。"
+      },
+      "en": {
+        "label": "Drag Coefficient",
+        "help": "Dimensionless coefficient representing aerodynamic drag strength."
+      },
+      "unit": "",
+      "min": 0,
+      "minExclusive": true
+    },
+    "atmosphere_scale_height_m": {
+      "zh-CN": {
+        "label": "大气标高",
+        "help": "指数大气密度每衰减 e 倍对应的高度尺度。"
+      },
+      "en": {
+        "label": "Atmosphere Scale Height",
+        "help": "Altitude scale over which exponential density decreases by a factor of e."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "atmosphere_surface_density_kg_m3": {
+      "zh-CN": {
+        "label": "海平面参考密度",
+        "help": "指数大气模型在参考表面的空气密度。"
+      },
+      "en": {
+        "label": "Surface Reference Density",
+        "help": "Atmospheric density at the reference surface for the exponential model."
+      },
+      "unit": "kg/m³",
+      "min": 0,
+      "minExclusive": true
+    },
+    "semi_major_axis_m": {
+      "zh-CN": {
+        "label": "轨道半长轴",
+        "help": "决定轨道总体尺寸；必须保证近地点位于地球表面以上。"
+      },
+      "en": {
+        "label": "Orbit Semi-Major Axis",
+        "help": "Sets the overall orbit size. Periapsis must remain above Earth."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "eccentricity": {
+      "zh-CN": {
+        "label": "轨道偏心率",
+        "help": "描述轨道椭圆程度；接近 0 为近圆轨道，必须小于 1。"
+      },
+      "en": {
+        "label": "Orbit Eccentricity",
+        "help": "Describes orbit ellipticity. Near zero is nearly circular and the value must remain below one."
+      },
+      "unit": "",
+      "min": 1e-06,
+      "max": 1,
+      "maxExclusive": true,
+      "inputMax": 0.999999
+    },
+    "argument_of_periapsis_deg": {
+      "zh-CN": {
+        "label": "近地点幅角",
+        "help": "从升交点沿轨道运动方向量到近地点的角度。"
+      },
+      "en": {
+        "label": "Argument of Periapsis",
+        "help": "Angle from ascending node to periapsis along the direction of motion."
+      },
+      "unit": "°",
+      "min": 0,
+      "max": 360,
+      "maxExclusive": true,
+      "inputMax": 359.999
+    },
+    "raan_deg": {
+      "zh-CN": {
+        "label": "升交点赤经",
+        "help": "从参考方向量到升交点的角度，用于确定轨道面朝向。"
+      },
+      "en": {
+        "label": "Right Ascension of Ascending Node",
+        "help": "Angle locating the ascending node and orienting the orbital plane."
+      },
+      "unit": "°",
+      "min": 0,
+      "max": 360,
+      "maxExclusive": true,
+      "inputMax": 359.999
+    },
+    "true_anomaly_deg": {
+      "zh-CN": {
+        "label": "初始真近点角",
+        "help": "航天器从近地点沿轨道运行到初始位置的角度。"
+      },
+      "en": {
+        "label": "Initial True Anomaly",
+        "help": "Angle from periapsis to the initial spacecraft position."
+      },
+      "unit": "°",
+      "min": 0,
+      "max": 360,
+      "maxExclusive": true,
+      "inputMax": 359.999
+    },
+    "start_epoch_s_since_j2000": {
+      "zh-CN": {
+        "label": "起始历元",
+        "help": "仿真开始时刻，以 J2000 历元后的秒数表示。"
+      },
+      "en": {
+        "label": "Start Epoch",
+        "help": "Simulation start time in seconds since the J2000 epoch."
+      },
+      "unit": "s"
+    },
+    "duration_s": {
+      "zh-CN": {
+        "label": "仿真时长",
+        "help": "需要从初始状态向前计算的总时间。"
+      },
+      "en": {
+        "label": "Simulation Duration",
+        "help": "Total time propagated from the initial state."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "integrator": {
+      "zh-CN": {
+        "label": "数值积分器",
+        "help": "用于推进动力学状态的数值算法，由当前模型固定。"
+      },
+      "en": {
+        "label": "Numerical Integrator",
+        "help": "Numerical algorithm advancing the dynamics state, fixed by the current model."
+      },
+      "unit": ""
+    },
+    "step_size_s": {
+      "zh-CN": {
+        "label": "积分步长",
+        "help": "每次动力学计算推进的时间；越小通常更精细但更慢。"
+      },
+      "en": {
+        "label": "Integration Step",
+        "help": "Time advanced by each dynamics step. Smaller is generally finer but slower."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "output_interval_s": {
+      "zh-CN": {
+        "label": "输出间隔",
+        "help": "每隔多长仿真时间保存一次状态，必须不小于积分步长。"
+      },
+      "en": {
+        "label": "Output Interval",
+        "help": "Time between saved states. It must not be smaller than the integration step."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "model_id": {
+      "zh-CN": {
+        "label": "模型编号",
+        "help": "所选后端内部的经过验证的模型名称，由任务变体固定。"
+      },
+      "en": {
+        "label": "Model Identifier",
+        "help": "Validated backend-native model selected by the task variant."
+      },
+      "unit": ""
+    },
+    "aircraft.model_id": {
+      "zh-CN": {
+        "label": "飞机型号",
+        "help": "本次仿真使用的 JSBSim 飞机模型，由左侧任务变体决定。"
+      },
+      "en": {
+        "label": "Aircraft Model",
+        "help": "JSBSim aircraft model used for this run and selected by the task variant."
+      },
+      "unit": ""
+    },
+    "reaction_wheels.model_id": {
+      "zh-CN": {
+        "label": "反作用轮型号",
+        "help": "Basilisk 中使用的经过验证的反作用轮硬件模型。"
+      },
+      "en": {
+        "label": "Reaction-Wheel Model",
+        "help": "Validated reaction-wheel hardware model used by Basilisk."
+      },
+      "unit": ""
+    },
+    "altitude_msl_m": {
+      "zh-CN": {
+        "label": "初始海拔高度",
+        "help": "飞机相对平均海平面的初始高度。"
+      },
+      "en": {
+        "label": "Initial Altitude MSL",
+        "help": "Aircraft initial height above mean sea level."
+      },
+      "unit": "m",
+      "min": 0,
+      "max": 5000
+    },
+    "calibrated_airspeed_m_s": {
+      "zh-CN": {
+        "label": "初始校准空速",
+        "help": "飞机配平时采用的校准空速；当前模型接受 30–65 m/s。"
+      },
+      "en": {
+        "label": "Initial Calibrated Airspeed",
+        "help": "Calibrated airspeed used for trim. Current models accept 30–65 m/s."
+      },
+      "unit": "m/s",
+      "min": 30,
+      "max": 65
+    },
+    "flight_path_angle_deg": {
+      "zh-CN": {
+        "label": "初始航迹倾角",
+        "help": "速度方向相对水平面的角度；正值爬升，负值下降。"
+      },
+      "en": {
+        "label": "Initial Flight-Path Angle",
+        "help": "Velocity angle above horizontal. Positive climbs and negative descends."
+      },
+      "unit": "°",
+      "min": -5,
+      "max": 5
+    },
+    "wind_north_m_s": {
+      "zh-CN": {
+        "label": "北向风速",
+        "help": "风速在正北方向的分量；负值表示向南。"
+      },
+      "en": {
+        "label": "North Wind Component",
+        "help": "Wind component toward north. Negative values point south."
+      },
+      "unit": "m/s",
+      "min": -50,
+      "max": 50
+    },
+    "wind_east_m_s": {
+      "zh-CN": {
+        "label": "东向风速",
+        "help": "风速在正东方向的分量；负值表示向西。"
+      },
+      "en": {
+        "label": "East Wind Component",
+        "help": "Wind component toward east. Negative values point west."
+      },
+      "unit": "m/s",
+      "min": -50,
+      "max": 50
+    },
+    "wind_down_m_s": {
+      "zh-CN": {
+        "label": "向下风速",
+        "help": "风速竖直向下的分量；负值表示上升气流。"
+      },
+      "en": {
+        "label": "Downward Wind Component",
+        "help": "Vertical wind component positive downward. Negative values are updrafts."
+      },
+      "unit": "m/s",
+      "min": -20,
+      "max": 20
+    },
+    "mode": {
+      "zh-CN": {
+        "label": "配平模式",
+        "help": "决定仿真开始前求解哪种稳定飞行状态，由模型固定。"
+      },
+      "en": {
+        "label": "Trim Mode",
+        "help": "Selects the steady condition solved before simulation and is fixed by the model."
+      },
+      "unit": ""
+    },
+    "reference": {
+      "zh-CN": {
+        "label": "操纵量参考",
+        "help": "说明控制输入相对于配平值还是绝对值，当前固定为相对配平。"
+      },
+      "en": {
+        "label": "Control Reference",
+        "help": "Defines whether inputs are relative to trim or absolute. Currently fixed to trim-relative."
+      },
+      "unit": ""
+    },
+    "segments": {
+      "zh-CN": {
+        "label": "操纵时序",
+        "help": "JSON 数组。每段填写起止时间以及四个归一化操纵增量，范围通常为 -1 到 1。"
+      },
+      "en": {
+        "label": "Control Schedule",
+        "help": "JSON array. Each segment defines start/end time and four normalized control increments, typically from -1 to 1."
+      },
+      "unit": ""
+    },
+    "principal_inertia_kg_m2": {
+      "zh-CN": {
+        "label": "航天器主惯量",
+        "help": "三个机体主轴转动惯量 [Ixx, Iyy, Izz]，均须为正并满足三角不等式。"
+      },
+      "en": {
+        "label": "Spacecraft Principal Inertia",
+        "help": "Body-axis moments [Ixx, Iyy, Izz]. All must be positive and satisfy the triangle inequality."
+      },
+      "unit": "kg·m²"
+    },
+    "mrp_sigma_bn": {
+      "zh-CN": {
+        "label": "初始姿态 MRP",
+        "help": "用三个修正罗德里格斯参数表示初始机体姿态，向量模必须小于 1。"
+      },
+      "en": {
+        "label": "Initial Attitude MRP",
+        "help": "Three modified Rodrigues parameters representing initial body attitude. Vector norm must be below one."
+      },
+      "unit": ""
+    },
+    "angular_velocity_bn_body_rad_s": {
+      "zh-CN": {
+        "label": "初始机体角速度",
+        "help": "绕机体 X、Y、Z 三轴的初始角速度 [ωx, ωy, ωz]。"
+      },
+      "en": {
+        "label": "Initial Body Angular Velocity",
+        "help": "Initial rates [ωx, ωy, ωz] about the body X, Y, and Z axes."
+      },
+      "unit": "rad/s"
+    },
+    "controller": {
+      "zh-CN": {
+        "label": "控制器",
+        "help": "选择姿态反馈或角速度阻尼控制器，由任务变体固定。"
+      },
+      "en": {
+        "label": "Controller",
+        "help": "Selects attitude feedback or rate damping and is fixed by the variant."
+      },
+      "unit": ""
+    },
+    "navigation": {
+      "zh-CN": {
+        "label": "导航模型",
+        "help": "向控制器提供姿态和角速度测量，当前采用无噪声理想导航。"
+      },
+      "en": {
+        "label": "Navigation Model",
+        "help": "Provides attitude and rate measurements. Current navigation is ideal and noise-free."
+      },
+      "unit": ""
+    },
+    "guidance": {
+      "zh-CN": {
+        "label": "制导模式",
+        "help": "生成目标姿态，当前采用惯性空间固定姿态目标。"
+      },
+      "en": {
+        "label": "Guidance Mode",
+        "help": "Generates the attitude reference. Current guidance holds an inertially fixed target."
+      },
+      "unit": ""
+    },
+    "reference_mrp_sigma_rn": {
+      "zh-CN": {
+        "label": "目标姿态 MRP",
+        "help": "控制器希望航天器达到的惯性姿态，向量模必须小于 1。"
+      },
+      "en": {
+        "label": "Reference Attitude MRP",
+        "help": "Desired inertial attitude for the controller. Vector norm must be below one."
+      },
+      "unit": ""
+    },
+    "mrp_gain_n_m": {
+      "zh-CN": {
+        "label": "姿态反馈增益",
+        "help": "姿态误差对应的恢复力矩强度；角速度阻尼任务中必须为 0。"
+      },
+      "en": {
+        "label": "Attitude Feedback Gain",
+        "help": "Restoring torque per attitude error. It must be zero for rate-damping tasks."
+      },
+      "unit": "N·m",
+      "min": 0
+    },
+    "rate_gain_n_m_s": {
+      "zh-CN": {
+        "label": "角速度反馈增益",
+        "help": "抑制机体转动的阻尼强度，必须为正。"
+      },
+      "en": {
+        "label": "Rate Feedback Gain",
+        "help": "Damping strength opposing body rotation. It must be positive."
+      },
+      "unit": "N·m·s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "spin_axes_body": {
+      "zh-CN": {
+        "label": "反作用轮安装轴",
+        "help": "三个单位向量组成的 3×3 数组，分别定义每个轮在机体系中的自转轴。"
+      },
+      "en": {
+        "label": "Wheel Spin Axes",
+        "help": "A 3×3 array of unit vectors defining each wheel spin axis in body coordinates."
+      },
+      "unit": ""
+    },
+    "initial_speed_rpm": {
+      "zh-CN": {
+        "label": "反作用轮初始转速",
+        "help": "三个反作用轮在仿真开始时的转速 [轮1, 轮2, 轮3]。"
+      },
+      "en": {
+        "label": "Initial Wheel Speeds",
+        "help": "Three reaction-wheel speeds at simulation start [wheel 1, wheel 2, wheel 3]."
+      },
+      "unit": "rpm"
+    },
+    "max_momentum_n_m_s": {
+      "zh-CN": {
+        "label": "最大角动量",
+        "help": "单个反作用轮允许储存的最大角动量。"
+      },
+      "en": {
+        "label": "Maximum Wheel Momentum",
+        "help": "Maximum angular momentum stored by one reaction wheel."
+      },
+      "unit": "N·m·s",
+      "min": 0,
+      "minExclusive": true
+    },
+    "max_motor_torque_n_m": {
+      "zh-CN": {
+        "label": "最大电机力矩",
+        "help": "单个反作用轮电机可以施加的最大力矩。"
+      },
+      "en": {
+        "label": "Maximum Motor Torque",
+        "help": "Maximum torque available from one reaction-wheel motor."
+      },
+      "unit": "N·m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "max_speed_rpm": {
+      "zh-CN": {
+        "label": "最大轮速",
+        "help": "反作用轮允许达到的绝对转速上限。"
+      },
+      "en": {
+        "label": "Maximum Wheel Speed",
+        "help": "Absolute reaction-wheel speed limit."
+      },
+      "unit": "rpm",
+      "min": 0,
+      "minExclusive": true
+    },
+    "payload_mass_kg": {
+      "zh-CN": {
+        "label": "有效载荷质量",
+        "help": "计划送入目标轨道的有效载荷质量；最终在轨飞行器还包含上面级干质量。"
+      },
+      "en": {
+        "label": "Payload Mass",
+        "help": "Payload delivered to the target orbit. Final orbital mass also includes the upper-stage dry mass."
+      },
+      "unit": "kg",
+      "min": 0,
+      "minExclusive": true
+    },
+    "vehicle.reference_area_m2": {
+      "zh-CN": {
+        "label": "运载火箭气动参考面积",
+        "help": "运载火箭垂直于相对气流的等效面积，用于计算动力上升和入轨验证段的大气阻力。"
+      },
+      "en": {
+        "label": "Launch Vehicle Reference Area",
+        "help": "Effective area normal to relative airflow, used for drag during powered ascent and orbital verification."
+      },
+      "unit": "m²",
+      "min": 0,
+      "minExclusive": true
+    },
+    "vehicle.drag_coefficient": {
+      "zh-CN": {
+        "label": "运载火箭阻力系数",
+        "help": "用于计算动力上升和入轨验证段阻力的无量纲常值系数。"
+      },
+      "en": {
+        "label": "Launch Vehicle Drag Coefficient",
+        "help": "Constant dimensionless coefficient used for drag during powered ascent and orbital verification."
+      },
+      "unit": "",
+      "min": 0,
+      "minExclusive": true
+    },
+    "initial_vertical_speed_m_s": {
+      "zh-CN": {
+        "label": "初始离地速度",
+        "help": "仿真起点的竖直向上速度，用于从已离开发射台的非奇异状态开始积分。"
+      },
+      "en": {
+        "label": "Initial Clearance Speed",
+        "help": "Initial upward speed used to begin integration from a nonsingular post-pad-clearance state."
+      },
+      "unit": "m/s",
+      "min": 0,
+      "minExclusive": true,
+      "max": 100
+    },
+    "stages": {
+      "zh-CN": {
+        "label": "两级火箭参数数组",
+        "help": "每级依次填写 stage_id、干质量、推进剂质量、推力、比冲、燃烧时间及 [[级内时间, 相对水平俯仰角], ...]。推力、比冲、燃烧时间和推进剂质量必须闭合。"
+      },
+      "en": {
+        "label": "Two-Stage Parameter Array",
+        "help": "Each stage declares its id, dry and propellant mass, thrust, specific impulse, burn duration, and [[stage time, pitch above horizontal], ...]. Propulsion values must close the mass balance."
+      },
+      "unit": ""
+    },
+    "target_orbit.altitude_m": {
+      "zh-CN": {
+        "label": "目标近圆轨道高度",
+        "help": "期望入轨近地点和远地点共同接近的地球参考球面高度。"
+      },
+      "en": {
+        "label": "Target Near-Circular Altitude",
+        "help": "Reference-sphere altitude targeted by both insertion periapsis and apoapsis."
+      },
+      "unit": "m",
+      "min": 120000
+    },
+    "altitude_tolerance_m": {
+      "zh-CN": {
+        "label": "近远地点高度容差",
+        "help": "入轨近地点和远地点相对目标高度允许的最大绝对偏差。"
+      },
+      "en": {
+        "label": "Apsis Altitude Tolerance",
+        "help": "Maximum absolute error allowed for insertion periapsis and apoapsis altitude."
+      },
+      "unit": "m",
+      "min": 0,
+      "minExclusive": true
+    },
+    "maximum_eccentricity": {
+      "zh-CN": {
+        "label": "最大入轨偏心率",
+        "help": "入轨状态允许的偏心率上限；数值越小，轨道越接近圆形。"
+      },
+      "en": {
+        "label": "Maximum Insertion Eccentricity",
+        "help": "Upper eccentricity bound at insertion. Smaller values require a more nearly circular orbit."
+      },
+      "unit": "",
+      "min": 0,
+      "minExclusive": true,
+      "max": 0.1,
+      "maxExclusive": true
+    },
+    "post_insertion_coast_duration_s": {
+      "zh-CN": {
+        "label": "入轨后验证时长",
+        "help": "二级关机后继续使用 TudatPy 无动力传播的时间，用于确认轨道不会立即穿地或失稳。"
+      },
+      "en": {
+        "label": "Post-Insertion Verification Duration",
+        "help": "Unpowered TudatPy propagation after upper-stage cutoff, used to verify that the orbit remains valid."
+      },
+      "unit": "s",
+      "min": 0,
+      "minExclusive": true
+    }
+  },
+  "basicSections": {
+    "rocket_flight": [
+      "environment",
+      "vehicle",
+      "motor",
+      "recovery",
+      "launch",
+      "output"
+    ],
+    "orbit_propagation": [
+      "spacecraft",
+      "aerodynamics",
+      "initial_state",
+      "propagation"
+    ],
+    "launch_to_orbit": [
+      "launch_site",
+      "vehicle",
+      "stages",
+      "target_orbit",
+      "propagation"
+    ],
+    "aircraft_flight": [
+      "aircraft",
+      "initial_condition",
+      "environment",
+      "propagation"
+    ],
+    "spacecraft_gnc": [
+      "spacecraft",
+      "initial_state",
+      "gnc",
+      "propagation"
+    ]
+  },
+  "recommendedPaths": {
+    "rocket_flight": [
+      "environment.elevation_m",
+      "vehicle.dry_mass_without_motor_kg",
+      "motor.burn_time_s",
+      "launch.inclination_deg",
+      "launch.heading_deg",
+      "launch.max_time_s"
+    ],
+    "orbit_propagation": [
+      "spacecraft.mass_kg",
+      "initial_state.semi_major_axis_m",
+      "initial_state.eccentricity",
+      "initial_state.inclination_deg",
+      "propagation.duration_s"
+    ],
+    "launch_to_orbit": [
+      "vehicle.payload_mass_kg",
+      "stages",
+      "target_orbit.altitude_m",
+      "target_orbit.altitude_tolerance_m",
+      "target_orbit.maximum_eccentricity",
+      "propagation.post_insertion_coast_duration_s"
+    ],
+    "aircraft_flight": [
+      "initial_condition.altitude_msl_m",
+      "initial_condition.calibrated_airspeed_m_s",
+      "initial_condition.flight_path_angle_deg",
+      "initial_condition.heading_deg",
+      "propagation.duration_s"
+    ],
+    "spacecraft_gnc": [
+      "spacecraft.mass_kg",
+      "initial_state.mrp_sigma_bn",
+      "initial_state.angular_velocity_bn_body_rad_s",
+      "gnc.reference_mrp_sigma_rn",
+      "gnc.mrp_gain_n_m",
+      "gnc.rate_gain_n_m_s",
+      "propagation.duration_s"
+    ]
+  }
+}

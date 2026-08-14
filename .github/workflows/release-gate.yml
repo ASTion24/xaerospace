@@ -1,0 +1,86 @@
+name: Release Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Quality and wheel smoke
+    runs-on: macos-14
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          python3 -m venv "$RUNNER_TEMP/uv-bootstrap"
+          "$RUNNER_TEMP/uv-bootstrap/bin/python" -m pip install uv==0.12.4
+          echo "$RUNNER_TEMP/uv-bootstrap/bin" >> "$GITHUB_PATH"
+
+      - name: Install project
+        run: uv sync --extra test --extra release --python 3.12
+
+      - name: Verify lock file
+        run: uv lock --check
+
+      - name: Static checks
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Deterministic unit tests
+        run: |
+          uv run pytest -q \
+            tests/test_*config.py \
+            tests/test_cli.py \
+            tests/test_parameter_definitions.py \
+            tests/test_paths.py \
+            tests/test_protocol.py \
+            tests/test_provider_config.py \
+            tests/test_task_families.py
+
+      - name: Build and smoke-test wheel
+        run: |
+          mkdir -p dist
+          SOURCE_DATE_EPOCH=1704067200 \
+            uv build --wheel --out-dir dist
+          uv run python scripts/wheel_smoke.py dist/xaerospace-*.whl
+
+  full-physics:
+    name: Four-backend physics gate
+    needs: quality
+    runs-on: macos-14
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        run: |
+          python3 -m venv "$RUNNER_TEMP/uv-bootstrap"
+          "$RUNNER_TEMP/uv-bootstrap/bin/python" -m pip install uv==0.12.4
+          echo "$RUNNER_TEMP/uv-bootstrap/bin" >> "$GITHUB_PATH"
+
+      - name: Install project
+        run: uv sync --extra test --extra release --python 3.12
+
+      - name: Cache pinned TudatPy runtime
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Application Support/Xaerospace/runtime/tudat
+          key: tudatpy-macos-arm64-${{ hashFiles('config/tudatpy-macos-arm64-lock.txt', 'scripts/setup_tudatpy_macos_arm64.sh') }}
+
+      - name: Install pinned TudatPy runtime
+        run: uv run xaerospace setup-tudatpy
+
+      - name: Run complete release gate
+        run: uv run python scripts/release_gate.py

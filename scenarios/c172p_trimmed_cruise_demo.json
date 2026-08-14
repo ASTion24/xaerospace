@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "name": "c172p_trimmed_cruise_demo",
+  "description": "Thirty-second trimmed C172P level-cruise stability reference.",
+  "backend": "jsbsim",
+  "dynamics": "fixed_wing_trimmed_6dof",
+  "aircraft": {
+    "model_id": "c172p"
+  },
+  "initial_condition": {
+    "latitude_deg": 35.0,
+    "longitude_deg": -117.0,
+    "altitude_msl_m": 1524.0,
+    "calibrated_airspeed_m_s": 46.3,
+    "flight_path_angle_deg": 0.0,
+    "heading_deg": 90.0
+  },
+  "environment": {
+    "atmosphere": "us_standard_1976",
+    "wind_north_m_s": 0.0,
+    "wind_east_m_s": 0.0,
+    "wind_down_m_s": 0.0
+  },
+  "trim": {
+    "mode": "longitudinal"
+  },
+  "controls": {
+    "reference": "trim_relative",
+    "segments": []
+  },
+  "propagation": {
+    "duration_s": 30.0,
+    "step_size_s": 0.008333333333333333,
+    "output_interval_s": 0.1
+  }
+}

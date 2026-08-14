@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "name": "Single-stage rigid-body sounding rocket",
+  "description": "A six-degree-of-freedom rocket with aerodynamic surfaces and canted fins.",
+  "backend": "rocketpy",
+  "dynamics": "single_stage_rigid_body_6dof",
+  "environment": {
+    "latitude_deg": 32.990254,
+    "longitude_deg": -106.974998,
+    "elevation_m": 1400.0,
+    "atmospheric_model": "standard_atmosphere"
+  },
+  "vehicle": {
+    "radius_m": 0.0635,
+    "dry_mass_without_motor_kg": 14.426,
+    "center_of_mass_without_motor_m": 0.0,
+    "drag_coefficient_power_on": 0.43,
+    "drag_coefficient_power_off": 0.43
+  },
+  "motor": {
+    "thrust_curve": [
+      [0.0, 0.0],
+      [0.05, 1200.0],
+      [0.2, 1050.0],
+      [1.0, 900.0],
+      [2.0, 780.0],
+      [2.8, 350.0],
+      [3.0, 0.0]
+    ],
+    "dry_mass_kg": 1.815,
+    "propellant_initial_mass_kg": 2.956,
+    "burn_time_s": 3.0
+  },
+  "rigid_body": {
+    "vehicle_dry_inertia_kg_m2": [6.321, 6.321, 0.034],
+    "coordinate_system_orientation": "tail_to_nose",
+    "motor_position_m": -1.373,
+    "motor": {
+      "dry_inertia_kg_m2": [0.125, 0.125, 0.002],
+      "chamber_radius_m": 0.033,
+      "chamber_height_m": 0.62,
+      "chamber_position_m": 0.397,
+      "nozzle_radius_m": 0.033,
+      "center_of_dry_mass_position_m": 0.317,
+      "nozzle_position_m": 0.0,
+      "coordinate_system_orientation": "nozzle_to_combustion_chamber"
+    },
+    "nose": {
+      "length_m": 0.55829,
+      "kind": "von karman",
+      "position_m": 1.278
+    },
+    "fins": {
+      "count": 4,
+      "root_chord_m": 0.12,
+      "tip_chord_m": 0.06,
+      "span_m": 0.11,
+      "position_m": -1.04956,
+      "cant_angle_deg": 0.5
+    },
+    "tail": {
+      "top_radius_m": 0.0635,
+      "bottom_radius_m": 0.0435,
+      "length_m": 0.06,
+      "position_m": -1.194656
+    },
+    "rail_buttons": {
+      "upper_position_m": 0.0818,
+      "lower_position_m": -0.618,
+      "angular_position_deg": 45.0
+    }
+  },
+  "launch": {
+    "rail_length_m": 5.2,
+    "inclination_deg": 85.0,
+    "heading_deg": 90.0,
+    "max_time_s": 150.0,
+    "max_time_step_s": 0.05
+  },
+  "output": {
+    "sample_interval_s": 0.05
+  }
+}

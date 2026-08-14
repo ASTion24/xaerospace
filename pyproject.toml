@@ -1,0 +1,79 @@
+[build-system]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xaerospace"
+dynamic = ["version"]
+description = "LLM-first aerospace simulation studio backed by RocketPy, TudatPy, JSBSim, and Basilisk"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = "MIT"
+dependencies = [
+    "bsk==2.11.0",
+    "fastapi>=0.116,<1.0",
+    "httpx2>=2.9,<3.0",
+    "jsbsim==1.3.1",
+    "matplotlib>=3.9",
+    "netCDF4==1.7.2",
+    "numpy>=1.26,<2.0",
+    "rocketpy==1.13.0",
+    "uvicorn>=0.35,<1.0",
+]
+
+[project.optional-dependencies]
+docs = [
+    "beautifulsoup4>=4.13,<5.0",
+    "fonttools>=4.60,<5.0",
+    "markdown>=3.8,<4.0",
+    "pymupdf>=1.26,<2.0",
+]
+test = [
+    "pytest>=8.0",
+    "ruff>=0.12",
+]
+release = [
+    "setuptools==80.9.0",
+    "wheel==0.45.1",
+]
+
+[project.scripts]
+xaerospace = "aerospace_simulator.cli:main"
+wms-aerospace = "aerospace_simulator.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "aerospace_simulator._version.__version__" }
+
+[tool.setuptools.package-data]
+aerospace_simulator = ["parameter_definitions.json"]
+
+[tool.setuptools.data-files]
+"share/wms-aerospace/config" = [
+    "config/providers.example.json",
+    "config/tudatpy-macos-arm64-lock.txt",
+]
+"share/wms-aerospace/evaluation" = ["evaluation/*.json"]
+"share/wms-aerospace/scenarios" = ["scenarios/*.json"]
+"share/wms-aerospace/scripts" = ["scripts/setup_tudatpy_macos_arm64.sh"]
+"share/wms-aerospace/web" = [
+    "web/*.css",
+    "web/*.html",
+    "web/*.js",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore:numpy.ndarray size changed.*:RuntimeWarning",
+]
+markers = [
+    "release_gate: executes every registered task variant on its real backend",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88

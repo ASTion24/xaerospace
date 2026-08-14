@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "name": "spacecraft_rate_damping_demo",
+  "description": "Rigid spacecraft angular-rate damping with three reaction wheels and no attitude-hold objective.",
+  "backend": "basilisk",
+  "dynamics": "spacecraft_rate_damping_gnc",
+  "spacecraft": {
+    "mass_kg": 750.0,
+    "principal_inertia_kg_m2": [
+      900.0,
+      800.0,
+      600.0
+    ]
+  },
+  "initial_state": {
+    "mrp_sigma_bn": [
+      0.1,
+      0.2,
+      -0.3
+    ],
+    "angular_velocity_bn_body_rad_s": [
+      0.001,
+      -0.01,
+      0.03
+    ]
+  },
+  "gnc": {
+    "enabled": true,
+    "navigation": "simple_nav_perfect",
+    "guidance": "inertial_fixed_mrp",
+    "reference_mrp_sigma_rn": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "controller": "rate_damping",
+    "mrp_gain_n_m": 0.0,
+    "rate_gain_n_m_s": 30.0
+  },
+  "reaction_wheels": {
+    "model_id": "Honeywell_HR16",
+    "spin_axes_body": [
+      [
+        1.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "initial_speed_rpm": [
+      100.0,
+      200.0,
+      300.0
+    ],
+    "max_momentum_n_m_s": 50.0,
+    "max_motor_torque_n_m": 0.2,
+    "max_speed_rpm": 6000.0
+  },
+  "propagation": {
+    "duration_s": 600.0,
+    "integrator": "rk4_fixed",
+    "step_size_s": 0.1,
+    "output_interval_s": 1.0
+  }
+}

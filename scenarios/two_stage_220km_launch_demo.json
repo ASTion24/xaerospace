@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "name": "two_stage_220km_launch_demo",
+  "description": "Two-stage launch from Cape Canaveral to a verified 220 km-class near-circular orbit.",
+  "backend": "tudatpy",
+  "dynamics": "two_stage_launch_to_orbit",
+  "frame": "J2000",
+  "central_body": {
+    "name": "Earth",
+    "gravitational_parameter_m3_s2": 398600441800000.0,
+    "equatorial_radius_m": 6378137.0,
+    "j2": 0.00108262668,
+    "rotation_rate_rad_s": 0.00007292115
+  },
+  "launch_site": {
+    "latitude_deg": 28.5,
+    "longitude_deg": -80.604,
+    "elevation_m": 3.0,
+    "start_epoch_s_since_j2000": 0.0,
+    "initial_vertical_speed_m_s": 1.0
+  },
+  "vehicle": {
+    "payload_mass_kg": 15000.0,
+    "reference_area_m2": 10.0,
+    "drag_coefficient": 0.3
+  },
+  "stages": [
+    {
+      "stage_id": "first_stage",
+      "dry_mass_kg": 25000.0,
+      "propellant_mass_kg": 400000.0,
+      "thrust_n": 7592245.161290322,
+      "specific_impulse_s": 300.0,
+      "burn_time_s": 155.0,
+      "guidance_pitch_program": [
+        [0.0, 90.0],
+        [15.0, 90.0],
+        [50.0, 70.0],
+        [100.0, 35.0],
+        [155.0, 10.0]
+      ]
+    },
+    {
+      "stage_id": "second_stage",
+      "dry_mass_kg": 8000.0,
+      "propellant_mass_kg": 57000.0,
+      "thrust_n": 782570.67,
+      "specific_impulse_s": 350.0,
+      "burn_time_s": 250.0,
+      "guidance_pitch_program": [
+        [0.0, 10.0],
+        [50.0, 2.0],
+        [150.0, -1.0],
+        [250.0, -2.0]
+      ]
+    }
+  ],
+  "propagation": {
+    "integrator": "rk4_fixed",
+    "step_size_s": 1.0,
+    "output_interval_s": 5.0,
+    "post_insertion_coast_duration_s": 1200.0
+  },
+  "target_orbit": {
+    "altitude_m": 220000.0,
+    "altitude_tolerance_m": 30000.0,
+    "maximum_eccentricity": 0.005
+  }
+}

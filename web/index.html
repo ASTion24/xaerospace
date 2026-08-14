@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      id="metaDescription"
+      name="description"
+      content="Xaerospace multi-backend simulation workflow interface"
+    />
+    <title>Xaerospace Studio</title>
+    <link rel="stylesheet" href="/assets/styles.css" />
+    <script src="/assets/i18n.js" defer></script>
+    <script src="/assets/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand-block">
+          <div class="brand-mark" aria-hidden="true">XA</div>
+          <div>
+            <p class="eyebrow" data-i18n="brandEyebrow">多后端仿真</p>
+            <h1 data-i18n="brandTitle">Xaerospace 工作台</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <div class="system-summary">
+            <div class="system-item">
+              <span class="status-dot" id="serviceDot"></span>
+              <span id="serviceStatus">正在连接服务</span>
+            </div>
+            <div class="system-divider"></div>
+            <div class="system-item">
+              <span class="muted" data-i18n="backends">后端</span>
+              <strong id="backendCount">--</strong>
+            </div>
+            <div class="system-divider"></div>
+            <div class="system-item">
+              <span class="muted" data-i18n="protocol">协议</span>
+              <strong id="protocolVersion">--</strong>
+            </div>
+          </div>
+          <div
+            class="language-switcher"
+            id="languageSwitcher"
+            role="group"
+            aria-label="界面语言"
+            data-i18n-aria-label="languageSwitcher"
+          >
+            <button
+              class="language-button active"
+              type="button"
+              data-locale="zh-CN"
+              aria-pressed="true"
+              data-i18n="languageChinese"
+            >
+              中文
+            </button>
+            <button
+              class="language-button"
+              type="button"
+              data-locale="en"
+              aria-pressed="false"
+              data-i18n="languageEnglish"
+            >
+              英文
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main class="studio-grid">
+        <aside
+          class="panel scenario-panel"
+          aria-label="任务来源"
+          data-i18n-aria-label="libraryAria"
+        >
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow" data-i18n="libraryEyebrow">任务入口</p>
+              <h2 data-i18n="sourceTitle">创建仿真任务</h2>
+            </div>
+            <span class="section-index" aria-hidden="true">01</span>
+          </div>
+          <div
+            class="source-tabs"
+            id="sourceViewTabs"
+            role="tablist"
+            aria-label="任务创建方式"
+            data-i18n-aria-label="sourceTabs"
+          >
+            <button
+              class="source-tab active"
+              id="assistantSourceTab"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="assistantSourcePane"
+              data-source-view="assistant"
+              data-i18n="sourceAssistant"
+            >
+              AI 编译
+            </button>
+            <button
+              class="source-tab"
+              id="catalogSourceTab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="catalogSourcePane"
+              data-source-view="catalog"
+              data-i18n="sourceCatalog"
+            >
+              能力目录
+            </button>
+          </div>
+          <div
+            class="source-pane assistant-source-pane"
+            id="assistantSourcePane"
+            role="tabpanel"
+            aria-labelledby="assistantSourceTab"
+          >
+          <section
+            class="assistant-draft-panel"
+            aria-labelledby="assistantDraftTitle"
+          >
+            <div class="assistant-draft-heading">
+              <div>
+                <span class="assistant-kicker" data-i18n="assistantKicker"
+                  >LLM 意图与合同编译</span
+                >
+                <strong id="assistantDraftTitle" data-i18n="assistantTitle"
+                  >AI 合同会话</strong
+                >
+              </div>
+              <span class="assistant-status unavailable" id="assistantStatus"
+                >未配置</span
+              >
+            </div>
+            <div
+              class="assistant-conversation"
+              id="assistantConversation"
+              aria-live="polite"
+              hidden
+            ></div>
+            <label class="assistant-prompt-label" for="assistantPrompt">
+              <span
+                id="assistantPromptCaption"
+                data-i18n="assistantPromptLabel"
+                >自然语言任务</span
+              >
+              <textarea
+                id="assistantPrompt"
+                maxlength="4000"
+                rows="3"
+                placeholder="例如：将 15000 kg 有效载荷通过两级火箭送入 220 km 近圆轨道。"
+                data-i18n-placeholder="assistantPromptPlaceholder"
+              ></textarea>
+            </label>
+            <div class="assistant-actions">
+              <button
+                class="button button-secondary assistant-generate"
+                id="generateAssistantDraft"
+                type="button"
+                data-i18n="assistantGenerate"
+              >
+                生成合同草案
+              </button>
+              <button
+                class="button button-ghost assistant-new-session"
+                id="newAssistantSession"
+                type="button"
+                data-i18n="assistantNewSession"
+                hidden
+              >
+                新建会话
+              </button>
+            </div>
+            <div
+              class="assistant-result"
+              id="assistantResult"
+              aria-live="polite"
+              hidden
+            ></div>
+            <div class="assistant-confirm-actions">
+              <button
+                class="button button-secondary assistant-apply"
+                id="applyAssistantDraft"
+                type="button"
+                data-i18n="assistantApply"
+                hidden
+              >
+                仅应用到编辑器
+              </button>
+              <button
+                class="button button-primary assistant-execute"
+                id="confirmAndRunAssistantDraft"
+                type="button"
+                data-i18n="assistantConfirmExecute"
+                hidden
+              >
+                确认合同并执行
+              </button>
+            </div>
+            <p
+              class="assistant-execution-note"
+              id="assistantExecutionNote"
+              data-i18n="assistantExecutionNote"
+              hidden
+            >
+              只有确认执行才会启动真实物理后端。
+            </p>
+          </section>
+          </div>
+          <div
+            class="source-pane catalog-source-pane"
+            id="catalogSourcePane"
+            role="tabpanel"
+            aria-labelledby="catalogSourceTab"
+            hidden
+          >
+          <div class="catalog-heading">
+            <h3 id="libraryTitle">新建任务</h3>
+            <span class="count-badge" id="libraryCount">0</span>
+          </div>
+          <div
+            class="library-tabs"
+            id="libraryTabs"
+            role="tablist"
+            aria-label="任务来源"
+            data-i18n-aria-label="libraryTabs"
+          >
+            <button
+              class="library-tab active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              data-library-mode="families"
+              data-i18n="newTask"
+            >
+              新建任务
+            </button>
+            <button
+              class="library-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              data-library-mode="templates"
+              data-i18n="exampleTemplates"
+            >
+              示例模板
+            </button>
+          </div>
+          <label class="search-box">
+            <span class="sr-only" id="librarySearchLabel">搜索任务族</span>
+            <input
+              id="scenarioSearch"
+              type="search"
+              placeholder="搜索任务族、组件或后端"
+            />
+          </label>
+          <div
+            class="filter-row"
+            id="backendFilters"
+            aria-label="后端筛选"
+            data-i18n-aria-label="backendFilters"
+          ></div>
+          <div class="scenario-list" id="libraryList">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+          </div>
+        </aside>
+
+        <section
+          class="panel workspace-panel"
+          aria-label="任务编排"
+          data-i18n-aria-label="composerAria"
+        >
+          <div class="workspace-header">
+            <div>
+              <p class="eyebrow" data-i18n="composerEyebrow">工作流编排</p>
+              <h2 data-i18n="composerTitle">任务编排</h2>
+            </div>
+            <div class="workflow-actions">
+              <button
+                class="button button-ghost button-compact"
+                id="replayWorkflow"
+                type="button"
+                data-i18n="replayWorkflow"
+              >
+                重放工作流
+              </button>
+              <input
+                class="sr-only"
+                id="replayWorkflowFile"
+                type="file"
+                accept="application/json,.json"
+                tabindex="-1"
+                aria-label="选择要重放的工作流 JSON"
+                data-i18n-aria-label="replayWorkflowFile"
+              />
+              <button
+                class="button button-ghost button-compact"
+                id="exportWorkflow"
+                type="button"
+                data-i18n="exportWorkflow"
+              >
+                导出工作流
+              </button>
+              <button
+                class="button button-ghost button-compact"
+                id="clearWorkflow"
+                type="button"
+                data-i18n="clear"
+              >
+                清空
+              </button>
+              <button
+                class="button button-primary"
+                id="runWorkflow"
+                type="button"
+                data-i18n="runWorkflow"
+              >
+                执行工作流
+              </button>
+            </div>
+          </div>
+
+          <div class="workflow-meta">
+            <label>
+              <span data-i18n="workflowName">工作流名称</span>
+              <input
+                id="workflowName"
+                type="text"
+                maxlength="120"
+                value="航空航天仿真工作流"
+              />
+            </label>
+            <div class="execution-contract">
+              <strong data-i18n="executionContract">执行合同</strong>
+              <span data-i18n="executionContractDetail"
+                >任务按队列顺序独立执行；失败时停止后续任务。</span
+              >
+            </div>
+          </div>
+
+          <section class="quick-start" id="quickStartGuide">
+            <div class="quick-start-heading">
+              <div>
+                <span class="quick-start-kicker" data-i18n="quickStartKicker"
+                  >首次运行路线</span
+                >
+                <strong data-i18n="quickStartTitle"
+                  >按四步完成第一次仿真</strong
+                >
+              </div>
+              <span class="quick-start-progress" id="quickStartProgress"
+                >1 / 4</span
+              >
+            </div>
+            <ol class="quick-start-steps">
+              <li class="quick-start-step" id="quickStartSource">
+                <span>1</span>
+                <div>
+                  <strong data-i18n="quickStartSourceTitle">选择任务</strong>
+                  <small data-i18n="quickStartSourceHelp"
+                    >从左侧能力目录选择任务族，或使用 AI 编译。</small
+                  >
+                </div>
+              </li>
+              <li class="quick-start-step" id="quickStartConfigure">
+                <span>2</span>
+                <div>
+                  <strong data-i18n="quickStartConfigureTitle">检查参数</strong>
+                  <small data-i18n="quickStartConfigureHelp"
+                    >默认值可直接运行；按需修改标有“推荐调整”的字段。</small
+                  >
+                </div>
+              </li>
+              <li class="quick-start-step" id="quickStartQueue">
+                <span>3</span>
+                <div>
+                  <strong data-i18n="quickStartQueueTitle">加入队列</strong>
+                  <small data-i18n="quickStartQueueHelp"
+                    >点击“校验并添加到工作流”。</small
+                  >
+                </div>
+              </li>
+              <li class="quick-start-step" id="quickStartRun">
+                <span>4</span>
+                <div>
+                  <strong data-i18n="quickStartRunTitle">执行并查看结果</strong>
+                  <small data-i18n="quickStartRunHelp"
+                    >点击右上角“执行工作流”，完成后自动显示结果。</small
+                  >
+                </div>
+              </li>
+            </ol>
+          </section>
+
+          <section class="queue-section">
+            <div class="section-heading">
+              <div>
+                <h3 data-i18n="queueTitle">执行队列</h3>
+                <p data-i18n="queueHelp">
+                  使用上下按钮调整顺序，选择任务后可编辑其强类型合同。
+                </p>
+              </div>
+              <span class="queue-count" id="queueCount">0 / 12</span>
+            </div>
+            <div class="task-queue empty-state compact" id="taskQueue">
+              <strong data-i18n="queueEmptyTitle">队列为空</strong>
+              <span data-i18n="queueEmptyDetail">从左侧选择模板并添加到工作流。</span>
+            </div>
+          </section>
+
+          <div
+            class="workbench-tabs"
+            id="workbenchTabs"
+            role="tablist"
+            aria-label="工作台视图"
+            data-i18n-aria-label="workbenchTabs"
+          >
+            <button
+              class="workbench-tab active"
+              id="editorWorkbenchTab"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="editorPane"
+              data-workbench-view="editor"
+            >
+              <span class="workbench-tab-index">01</span>
+              <span data-i18n="contractWorkspace">合同配置</span>
+            </button>
+            <button
+              class="workbench-tab"
+              id="resultsWorkbenchTab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="inspectorPane"
+              data-workbench-view="results"
+            >
+              <span class="workbench-tab-index">02</span>
+              <span data-i18n="resultWorkspace">运行结果</span>
+              <span class="run-status idle" id="workflowStatus">未执行</span>
+            </button>
+          </div>
+
+          <div class="workbench-stage">
+          <section
+            class="editor-section"
+            id="editorPane"
+            role="tabpanel"
+            aria-labelledby="editorWorkbenchTab"
+          >
+            <div class="section-heading editor-heading">
+              <div>
+                <p class="eyebrow" id="editorMode">新任务</p>
+                <h3 id="editorTitle">选择一个任务族</h3>
+              </div>
+              <div class="editor-heading-actions">
+                <label
+                  class="variant-select"
+                  id="variantSelectBlock"
+                  hidden
+                >
+                  <span data-i18n="variant">变体</span>
+                  <select
+                    id="variantSelect"
+                    aria-label="任务变体"
+                    data-i18n-aria-label="variant"
+                  ></select>
+                </label>
+                <button
+                  class="button button-ghost button-compact"
+                  id="importTask"
+                  type="button"
+                  data-i18n="importJson"
+                >
+                  导入 JSON
+                </button>
+                <input
+                  id="importTaskFile"
+                  type="file"
+                  accept=".json,application/json"
+                  hidden
+                />
+                <span class="backend-badge neutral" id="editorBackend"
+                  >未选择</span
+                >
+              </div>
+            </div>
+            <div class="component-summary" id="componentSummary" hidden>
+              <span id="componentSummaryLabel" data-i18n="activeComponents"
+                >激活组件</span
+              >
+              <div
+                id="componentChips"
+                role="list"
+                aria-labelledby="componentSummaryLabel"
+              ></div>
+            </div>
+            <div class="editor-view-toolbar">
+              <div
+                class="editor-tabs"
+                id="editorTabs"
+                role="tablist"
+                aria-label="合同编辑方式"
+                data-i18n-aria-label="editorTabs"
+              >
+                <button
+                  class="editor-tab active"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                  data-editor-view="form"
+                  data-i18n="parameterForm"
+                >
+                  参数表单
+                </button>
+                <button
+                  class="editor-tab"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  data-editor-view="json"
+                  data-i18n="jsonAdvanced"
+                >
+                  JSON 高级编辑
+                </button>
+              </div>
+              <button
+                class="button button-ghost button-compact"
+                id="toggleAdvancedParameters"
+                type="button"
+                data-i18n="showAdvancedParameters"
+              >
+                显示高级参数
+              </button>
+            </div>
+            <div class="editor-footer">
+              <div class="validation-message" id="validationMessage">
+                所有任务都会在提交前执行强类型校验和精确后端路由。
+              </div>
+              <div class="editor-footer-actions">
+                <button
+                  class="button button-ghost"
+                  id="validateTask"
+                  type="button"
+                  data-i18n="validateTask"
+                >
+                  仅校验参数
+                </button>
+                <button class="button button-primary" id="saveTask" type="button">
+                  校验并添加到工作流
+                </button>
+              </div>
+            </div>
+            <div class="parameter-form" id="parameterForm"></div>
+            <textarea
+              id="jsonEditor"
+              class="json-editor"
+              spellcheck="false"
+              aria-label="任务 JSON 合同"
+              placeholder="选择任务类型、示例模板，或导入 JSON 合同。"
+              data-i18n-aria-label="jsonContract"
+              data-i18n-placeholder="jsonPlaceholder"
+              hidden
+            ></textarea>
+          </section>
+
+        <aside
+          class="inspector-panel"
+          id="inspectorPane"
+          role="tabpanel"
+          aria-labelledby="resultsWorkbenchTab"
+          aria-label="执行结果"
+          data-i18n-aria-label="inspectorAria"
+          hidden
+        >
+          <div class="panel-heading inspector-heading">
+            <div>
+              <p class="eyebrow" data-i18n="inspectorEyebrow">运行检查</p>
+              <h2 data-i18n="inspectorTitle">执行结果</h2>
+            </div>
+            <span class="result-live-label" data-i18n="resultLiveLabel"
+              >仿真遥测与产物</span
+            >
+          </div>
+
+          <div class="progress-block" id="progressBlock" hidden>
+            <div class="progress-meta">
+              <span id="progressLabel">0 / 0</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div
+              class="progress-track"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+            >
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+          </div>
+
+          <div class="inspector-empty empty-state" id="inspectorEmpty">
+            <div class="empty-orbit" aria-hidden="true">
+              <span></span>
+            </div>
+            <strong data-i18n="waitingTitle">等待工作流执行</strong>
+            <p data-i18n="waitingDetail">
+              运行后将在这里显示物理指标、事件、模型清单和生成图。
+            </p>
+          </div>
+
+          <div class="result-content" id="resultContent" hidden>
+            <section class="result-identity">
+              <div>
+                <span class="task-kicker" id="resultTaskKind"></span>
+                <h3 id="resultTitle"></h3>
+              </div>
+              <span class="backend-badge" id="resultBackend"></span>
+            </section>
+
+            <div class="task-result-tabs" id="taskResultTabs"></div>
+
+            <section class="result-section" id="errorSection" hidden>
+              <h4 data-i18n="executionError">执行错误</h4>
+              <div class="error-box" id="errorBox"></div>
+            </section>
+
+            <section class="result-section" id="handoverSection" hidden>
+              <h4 data-i18n="handoverResult">状态交接证据</h4>
+              <div class="handover-result" id="handoverSummary"></div>
+            </section>
+
+            <section class="result-section" id="verificationSection" hidden>
+              <h4 data-i18n="targetOrbitAcceptance">目标轨道验收</h4>
+              <div class="handover-result" id="verificationSummary"></div>
+            </section>
+
+            <section class="result-section" id="metricSection">
+              <div class="result-section-heading">
+                <h4 data-i18n="coreMetrics">核心指标</h4>
+                <span id="sampleCount"></span>
+              </div>
+              <div class="metric-grid" id="metricGrid"></div>
+            </section>
+
+            <section class="result-section" id="plotSection">
+              <h4 data-i18n="simulationPlots">仿真图表</h4>
+              <div class="plot-gallery" id="plotGallery"></div>
+            </section>
+
+            <section class="result-section" id="eventSection">
+              <h4 data-i18n="eventTimeline">事件时间线</h4>
+              <div class="event-list" id="eventList"></div>
+            </section>
+
+            <section class="result-section" id="modelSection">
+              <details class="model-details">
+                <summary>
+                  <span data-i18n="modelAndEquations">模型与方程</span>
+                  <span id="modelSummary"></span>
+                </summary>
+                <div class="model-body" id="modelBody"></div>
+              </details>
+            </section>
+
+            <section class="result-section" id="artifactSection">
+              <h4 data-i18n="resultArtifacts">结果产物</h4>
+              <div class="artifact-list" id="artifactList"></div>
+            </section>
+          </div>
+        </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  </body>
+</html>

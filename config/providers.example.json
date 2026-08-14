@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "active_provider": "local_llama_cpp",
+  "providers": {
+    "local_llama_cpp": {
+      "type": "openai_compatible",
+      "base_url": "http://127.0.0.1:8080/v1",
+      "model": "replace-with-local-model-id",
+      "compatibility_mode": "llama_cpp",
+      "timeout_s": 120,
+      "max_concurrency": 1,
+      "max_output_tokens": 1024
+    },
+    "cloud_openai_compatible": {
+      "type": "openai_compatible",
+      "base_url": "https://api.example.invalid/v1",
+      "model": "replace-with-cloud-model-id",
+      "api_key_env": "WMS_PROVIDER_API_KEY",
+      "compatibility_mode": "strict",
+      "timeout_s": 45,
+      "max_concurrency": 1,
+      "max_output_tokens": 1024
+    },
+    "custom_header_auth": {
+      "type": "openai_compatible",
+      "base_url": "https://gateway.example.invalid/llm/v1",
+      "model": "replace-with-gateway-model-id",
+      "header_env": {
+        "X-API-Key": "WMS_GATEWAY_API_KEY"
+      },
+      "chat_completions_path": "/chat/completions",
+      "models_path": "/models",
+      "compatibility_mode": "strict",
+      "timeout_s": 45,
+      "max_concurrency": 1,
+      "max_output_tokens": 1024
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "name": "earth_orbit_two_body_demo",
+  "description": "Four-hour Earth orbit propagation with point-mass gravity.",
+  "backend": "tudatpy",
+  "dynamics": "earth_orbit_two_body",
+  "frame": "J2000",
+  "central_body": {
+    "name": "Earth",
+    "gravitational_parameter_m3_s2": 398600441800000.0,
+    "equatorial_radius_m": 6378137.0,
+    "j2": 0.00108262668,
+    "rotation_rate_rad_s": 0.00007292115
+  },
+  "spacecraft": {
+    "name": "Satellite",
+    "mass_kg": 500.0
+  },
+  "aerodynamics": {
+    "enabled": false,
+    "reference_area_m2": 4.0,
+    "drag_coefficient": 2.2,
+    "atmosphere_scale_height_m": 7200.0,
+    "atmosphere_surface_density_kg_m3": 1.225
+  },
+  "initial_state": {
+    "semi_major_axis_m": 7000000.0,
+    "eccentricity": 0.01,
+    "inclination_deg": 45.0,
+    "argument_of_periapsis_deg": 20.0,
+    "raan_deg": 40.0,
+    "true_anomaly_deg": 0.0
+  },
+  "propagation": {
+    "start_epoch_s_since_j2000": 0.0,
+    "duration_s": 14400.0,
+    "integrator": "rk4_fixed",
+    "step_size_s": 10.0,
+    "output_interval_s": 60.0
+  }
+}
