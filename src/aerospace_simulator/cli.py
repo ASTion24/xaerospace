@@ -231,9 +231,10 @@ def _run_web(args: argparse.Namespace) -> int:
         timer.start()
     print(f"Xaerospace Studio: {url}")
     uvicorn.run(
-        "aerospace_simulator.web_api:app",
+        "aerospace_simulator.web_api:create_app",
         host=args.host,
         port=args.port,
+        factory=True,
         reload=False,
     )
     return 0

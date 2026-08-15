@@ -6,8 +6,8 @@
 
 RocketPy · TudatPy · JSBSim · Basilisk
 
-[中文使用手册](docs/v0.2.0_product_demo_zh.md) ·
-[PDF 手册](docs/Xaerospace_v0.2.0_使用手册.pdf) ·
+[中文使用手册](docs/v0.2.1_product_demo_zh.md) ·
+[PDF 手册（v0.2.0）](docs/Xaerospace_v0.2.0_使用手册.pdf) ·
 [统一协议](docs/unified_io_protocol.md) ·
 [Provider 配置](docs/provider_configuration.md)
 
@@ -310,8 +310,8 @@ Hiragino Sans GB、Avenir Next 和 Menlo。
 
 ## 文档
 
-- [完整中文使用手册](docs/v0.2.0_product_demo_zh.md)
-- [PDF 使用手册](docs/Xaerospace_v0.2.0_使用手册.pdf)
+- [完整中文使用手册](docs/v0.2.1_product_demo_zh.md)
+- [PDF 使用手册（v0.2.0）](docs/Xaerospace_v0.2.0_使用手册.pdf)
 - [Provider 配置](docs/provider_configuration.md)
 - [统一输入输出协议](docs/unified_io_protocol.md)
 - [两级发射入轨](docs/two_stage_launch_to_orbit.md)

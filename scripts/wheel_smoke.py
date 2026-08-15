@@ -77,6 +77,18 @@ def main() -> int:
         raise RuntimeError("installed wheel health endpoint is not healthy")
     if result["runs_root"] != str((data_root / "runs").resolve()):
         raise RuntimeError("installed wheel writes runs outside its user data root")
+    if result["workspace_path"] != str((data_root / "workspace.sqlite3").resolve()):
+        raise RuntimeError("installed wheel writes its workspace outside user data")
+    if result["restored_status"] != "completed":
+        raise RuntimeError("installed wheel did not restore the completed workflow")
+    if result["verified_integrity"] != "ok":
+        raise RuntimeError("installed wheel did not verify the original artifact")
+    if result["tampered_integrity"] != "corrupt":
+        raise RuntimeError("installed wheel did not detect the tampered artifact")
+    if result["tampered_download_status"] != 404:
+        raise RuntimeError("installed wheel served a corrupt artifact")
+    if result["remaining_workflows"] != 0:
+        raise RuntimeError("installed wheel did not persist workflow deletion")
     if "site-packages" in result["tudat_python"]:
         raise RuntimeError("installed wheel derives TudatPy under site-packages")
     print(json.dumps(result, indent=2, sort_keys=True))
@@ -109,14 +121,21 @@ def _smoke_environment(data_root: Path) -> dict[str, str]:
 
 SMOKE_PROGRAM = r"""
 import json
+import os
+import time
 from pathlib import Path
 
-import aerospace_simulator
-from fastapi.testclient import TestClient
+data_root = Path(os.environ["XAEROSPACE_HOME"])
+workspace_path = data_root / "workspace.sqlite3"
+assert not data_root.exists()
 
+import aerospace_simulator
 from aerospace_simulator.cli import _bundled_resource, build_parser
 from aerospace_simulator.tudat_runtime import runtime_paths
 from aerospace_simulator.web_api import create_app
+from fastapi.testclient import TestClient
+
+assert not data_root.exists()
 
 package_path = Path(aerospace_simulator.__file__).resolve()
 assert "site-packages" in str(package_path), package_path
@@ -125,18 +144,82 @@ assert build_parser().parse_args(["setup-tudatpy"]).command == "setup-tudatpy"
 scenarios = _bundled_resource("scenarios")
 setup_script = _bundled_resource("scripts", "setup_tudatpy_macos_arm64.sh")
 assert setup_script.is_file()
-app = create_app()
-with TestClient(app) as client:
+
+first_app = create_app()
+with TestClient(first_app) as client:
     health = client.get("/api/health")
     catalog = client.get("/api/scenarios")
     assert client.get("/").status_code == 200
+    scenario = client.get("/api/scenarios/single_stage_demo").json()
+    submitted = client.post(
+        "/api/workflows",
+        json={
+            "name": "Installed wheel persistence smoke",
+            "tasks": [
+                {
+                    "task_id": "rocket",
+                    "document": scenario["document"],
+                }
+            ],
+        },
+    )
+    assert submitted.status_code == 202, submitted.text
+    workflow_id = submitted.json()["workflow_id"]
+    deadline = time.monotonic() + 120
+    while time.monotonic() < deadline:
+        workflow = client.get(f"/api/workflows/{workflow_id}").json()
+        if workflow["status"] in {"completed", "failed", "interrupted"}:
+            break
+        time.sleep(0.1)
+    assert workflow["status"] == "completed", workflow
+
+assert workspace_path.is_file()
+runs_root = str(first_app.state.workflow_store.runs_root)
+
+second_app = create_app()
+with TestClient(second_app) as client:
+    history = client.get("/api/workflows?limit=10").json()
+    assert history["total"] == 1
+    restored = client.get(f"/api/workflows/{workflow_id}").json()
+    result_artifact = next(
+        item
+        for item in restored["tasks"][0]["artifacts"]
+        if item["name"] == "result"
+    )
+    verified_integrity = result_artifact["integrity"]
+    assert client.get(result_artifact["url"]).status_code == 200
+
+result_path = next((data_root / "runs" / workflow_id).rglob("result.json"))
+result_path.write_text("tampered\n", encoding="utf-8")
+
+third_app = create_app()
+with TestClient(third_app) as client:
+    tampered = client.get(f"/api/workflows/{workflow_id}").json()
+    tampered_artifact = next(
+        item
+        for item in tampered["tasks"][0]["artifacts"]
+        if item["name"] == "result"
+    )
+    tampered_download_status = client.get(tampered_artifact["url"]).status_code
+    assert client.delete(f"/api/workflows/{workflow_id}").status_code == 204
+
+fourth_app = create_app()
+with TestClient(fourth_app) as client:
+    remaining_workflows = client.get("/api/workflows?limit=10").json()["total"]
+
 result = {
     "package_path": str(package_path),
     "version": aerospace_simulator.__version__,
     "health_status": health.json()["status"],
     "scenario_count": len(catalog.json()["scenarios"]),
     "scenarios_path": str(scenarios),
-    "runs_root": str(app.state.workflow_store.runs_root),
+    "runs_root": runs_root,
+    "workspace_path": str(workspace_path.resolve()),
+    "restored_status": restored["status"],
+    "verified_integrity": verified_integrity,
+    "tampered_integrity": tampered_artifact["integrity"],
+    "tampered_download_status": tampered_download_status,
+    "remaining_workflows": remaining_workflows,
     "tudat_python": str(runtime_paths()[0]),
 }
 print(json.dumps(result))

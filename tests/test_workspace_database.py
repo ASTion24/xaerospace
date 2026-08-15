@@ -107,6 +107,26 @@ def test_workspace_database_rejects_mismatched_index_id(tmp_path):
         reopened.close()
 
 
+def test_workspace_database_normalizes_initialization_errors(tmp_path):
+    blocked_parent = tmp_path / "not-a-directory"
+    blocked_parent.write_text("blocked\n", encoding="utf-8")
+
+    with pytest.raises(WorkspaceDatabaseError, match="unable to initialize"):
+        WorkspaceDatabase(blocked_parent / "workspace.sqlite3")
+
+
+def test_workspace_database_normalizes_sqlite_operation_errors(tmp_path):
+    database = WorkspaceDatabase(tmp_path / "workspace.sqlite3")
+    database.close()
+
+    with pytest.raises(WorkspaceDatabaseError, match="unable to read"):
+        database.load_workflows()
+    with pytest.raises(WorkspaceDatabaseError, match="unable to update"):
+        database.upsert_workflow(_workflow_record())
+    with pytest.raises(WorkspaceDatabaseError, match="unable to delete"):
+        database.delete_workflow("a" * 32)
+
+
 def _workflow_record() -> dict[str, object]:
     return json.loads(
         """
