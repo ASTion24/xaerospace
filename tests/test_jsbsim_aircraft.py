@@ -165,7 +165,5 @@ def test_aircraft_outputs_and_request_replay_are_deterministic(
     )
     normalized = json.loads(artifacts["result"].read_text(encoding="utf-8"))
     assert normalized["backend"]["backend_id"] == "jsbsim"
-    assert normalized["request"]["contract_schema"] == (
-        "wms.aerospace.aircraft_flight.v1"
-    )
+    assert normalized["request"]["contract_schema"] == ("xaerospace.aircraft_flight.v1")
     assert replay_artifacts["aircraft_response"].is_file()

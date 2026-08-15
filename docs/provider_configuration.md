@@ -53,7 +53,7 @@ chmod 600 config/providers.local.json
       "type": "openai_compatible",
       "base_url": "https://api.example.invalid/v1",
       "model": "replace-with-model-id",
-      "api_key_env": "WMS_PROVIDER_API_KEY",
+      "api_key_env": "XAEROSPACE_PROVIDER_API_KEY",
       "compatibility_mode": "strict",
       "timeout_s": 45,
       "max_concurrency": 1,
@@ -109,14 +109,14 @@ profile 名称只允许字母、数字、点、下划线和连字符，最长 64
 
 ```json
 {
-  "api_key_env": "WMS_PROVIDER_API_KEY"
+  "api_key_env": "XAEROSPACE_PROVIDER_API_KEY"
 }
 ```
 
 运行前设置：
 
 ```bash
-export WMS_PROVIDER_API_KEY="..."
+export XAEROSPACE_PROVIDER_API_KEY="..."
 ```
 
 系统发送：
@@ -132,8 +132,8 @@ Authorization: Bearer <value>
 ```json
 {
   "header_env": {
-    "X-API-Key": "WMS_GATEWAY_API_KEY",
-    "X-Organization": "WMS_GATEWAY_ORGANIZATION"
+    "X-API-Key": "XAEROSPACE_GATEWAY_API_KEY",
+    "X-Organization": "XAEROSPACE_GATEWAY_ORGANIZATION"
   }
 }
 ```
@@ -158,15 +158,15 @@ Authorization: Bearer <value>
 `xaerospace web` 和 `xaerospace assistant-eval` 按顺序查找：
 
 1. CLI `--provider-config`；
-2. `WMS_ASSISTANT_PROVIDER_CONFIG`；
+2. `XAEROSPACE_PROVIDER_CONFIG`；
 3. 当前目录的 `config/providers.local.json`；
 4. 源码项目目录的 `config/providers.local.json`；
-5. `~/.config/wms-aerospace/providers.local.json`。
+5. `~/.config/xaerospace/providers.local.json`。
 
 profile 选择顺序：
 
 1. CLI `--provider-profile`；
-2. `WMS_ASSISTANT_PROVIDER_PROFILE`；
+2. `XAEROSPACE_PROVIDER_PROFILE`；
 3. JSON 中的 `active_provider`。
 
 ### 6.2 CLI
@@ -190,8 +190,8 @@ xaerospace assistant-eval \
 ### 6.3 环境变量
 
 ```bash
-export WMS_ASSISTANT_PROVIDER_CONFIG="$PWD/config/providers.local.json"
-export WMS_ASSISTANT_PROVIDER_PROFILE="cloud"
+export XAEROSPACE_PROVIDER_CONFIG="$PWD/config/providers.local.json"
+export XAEROSPACE_PROVIDER_PROFILE="cloud"
 xaerospace web
 ```
 
@@ -213,7 +213,7 @@ xaerospace web
       "type": "openai_compatible",
       "base_url": "https://api.example.invalid/v1",
       "model": "cloud-model",
-      "api_key_env": "WMS_PROVIDER_API_KEY",
+      "api_key_env": "XAEROSPACE_PROVIDER_API_KEY",
       "compatibility_mode": "strict"
     },
     "gateway": {
@@ -221,7 +221,7 @@ xaerospace web
       "base_url": "https://gateway.example.invalid/llm/v1",
       "model": "gateway-model",
       "header_env": {
-        "X-API-Key": "WMS_GATEWAY_API_KEY"
+        "X-API-Key": "XAEROSPACE_GATEWAY_API_KEY"
       },
       "chat_completions_path": "/structured/chat",
       "models_path": "/catalog/models"
@@ -271,22 +271,22 @@ xaerospace web --provider-profile gateway
 
 选择的 API 失败时，Assistant 返回明确错误。手动合同和物理工作流仍可继续使用。
 
-## 10. 旧环境变量迁移
+## 10. 直接环境变量配置
 
-未选择 Provider JSON 时，以下旧变量仍可构造一个临时单 profile：
+未选择 Provider JSON 时，以下变量可构造一个临时单 profile：
 
 ```text
-WMS_ASSISTANT_LLM_BASE_URL
-WMS_ASSISTANT_LLM_MODEL
-WMS_ASSISTANT_LLM_API_KEY
-WMS_ASSISTANT_LLM_TIMEOUT_S
-WMS_ASSISTANT_LLM_COMPATIBILITY_MODE
-WMS_ASSISTANT_LLM_MAX_CONCURRENCY
-WMS_ASSISTANT_LLM_MAX_OUTPUT_TOKENS
-WMS_ASSISTANT_LLM_HEALTH_TIMEOUT_S
-WMS_ASSISTANT_LLM_CIRCUIT_FAILURE_THRESHOLD
-WMS_ASSISTANT_LLM_CIRCUIT_COOLDOWN_S
+XAEROSPACE_ASSISTANT_LLM_BASE_URL
+XAEROSPACE_ASSISTANT_LLM_MODEL
+XAEROSPACE_ASSISTANT_LLM_API_KEY
+XAEROSPACE_ASSISTANT_LLM_TIMEOUT_S
+XAEROSPACE_ASSISTANT_LLM_COMPATIBILITY_MODE
+XAEROSPACE_ASSISTANT_LLM_MAX_CONCURRENCY
+XAEROSPACE_ASSISTANT_LLM_MAX_OUTPUT_TOKENS
+XAEROSPACE_ASSISTANT_LLM_HEALTH_TIMEOUT_S
+XAEROSPACE_ASSISTANT_LLM_CIRCUIT_FAILURE_THRESHOLD
+XAEROSPACE_ASSISTANT_LLM_CIRCUIT_COOLDOWN_S
 ```
 
 Provider JSON 优先级更高。只要显式选择了 JSON，配置无效时就会失败，不会退回
-旧环境变量或其他 profile。
+直接环境变量或其他 profile。

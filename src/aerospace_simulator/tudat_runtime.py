@@ -31,8 +31,8 @@ def validate_runtime(python_executable: Path, runtime_home: Path) -> None:
     if not python_executable.is_file():
         raise TudatRuntimeUnavailableError(
             "TudatPy Python runtime not found at "
-            f"{python_executable}. Set WMS_TUDATPY_PYTHON or run the documented "
-            "TudatPy environment setup."
+            f"{python_executable}. Set XAEROSPACE_TUDATPY_PYTHON or run the "
+            "documented TudatPy environment setup."
         )
     resource_root = runtime_home / ".tudat" / "resource"
     missing = [

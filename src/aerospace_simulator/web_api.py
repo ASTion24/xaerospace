@@ -104,7 +104,7 @@ class WorkflowSubmitPayload(BaseModel):
 class WorkflowExportDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    workflow_schema: Literal["wms.aerospace.workflow.v1"]
+    workflow_schema: Literal["xaerospace.workflow.v1"]
     source_workflow_id: str = Field(min_length=1, max_length=64)
     name: str = Field(min_length=1, max_length=120)
     provenance: dict[str, JsonValue] | None = None
@@ -641,7 +641,7 @@ def _resource_directory(
     else:
         source_directory = project_root / name
         installed_directory = (
-            Path(sysconfig.get_path("data")) / "share" / "wms-aerospace" / name
+            Path(sysconfig.get_path("data")) / "share" / "xaerospace" / name
         )
         result = source_directory if source_directory.is_dir() else installed_directory
     if not result.is_dir():

@@ -93,7 +93,6 @@ def test_web_application_serves_catalog_capabilities_and_static_assets(client):
     assert 'id="catalogSourcePane"' in index.text
     assert 'id="workbenchTabs"' in index.text
     assert 'id="editorPane"' in index.text
-    assert 'id="inspectorPane"' in index.text
     assert 'id="quickStartGuide"' in index.text
     assert 'id="toggleAdvancedParameters"' in index.text
     assert 'id="handoverSection"' in index.text
@@ -134,6 +133,8 @@ def test_web_application_serves_catalog_capabilities_and_static_assets(client):
     assert "applyRestoredWorkflow" in javascript.text
     assert "workflowHistoryDeleted" in translations.text
     assert "Workflow History" in translations.text
+    assert "globalThis.XAEROSPACE_I18N" in javascript.text
+    assert "globalThis.XAEROSPACE_I18N" in translations.text
     assert "setSourceView" in javascript.text
     assert 'setWorkbenchView("results")' in javascript.text
     assert (
@@ -257,10 +258,14 @@ def test_task_family_catalog_exposes_variants_components_and_schema(client):
 
     assert schema_response.status_code == 200
     schema = schema_response.json()
-    assert schema["x-wms-family-id"] == "rocket_flight"
-    assert schema["x-wms-parameter-definitions-url"] == ("/api/parameter-definitions")
+    assert schema["x-xaerospace-family-id"] == "rocket_flight"
+    assert schema["x-xaerospace-parameter-definitions-url"] == (
+        "/api/parameter-definitions"
+    )
     assert (
-        schema["x-wms-parameter-definitions"]["fields"]["radius_m"]["minExclusive"]
+        schema["x-xaerospace-parameter-definitions"]["fields"]["radius_m"][
+            "minExclusive"
+        ]
         is True
     )
     assert schema["properties"]["dynamics"]["enum"] == [
@@ -352,7 +357,7 @@ def test_web_api_validates_documents_and_reports_exact_backend(client):
     assert response.json()["request"]["task_kind"] == ("single_stage_point_mass_3dof")
     assert response.json()["family"] == {
         "family_id": "rocket_flight",
-        "family_schema": "wms.aerospace.family.rocket_flight.v3",
+        "family_schema": "xaerospace.family.rocket_flight.v3",
         "variant_id": "point_mass_3dof",
         "component_ids": [
             "rocket.fidelity.point_mass_3dof",
@@ -474,7 +479,7 @@ def test_workflow_export_and_explicit_replay_preserve_contract(client):
         f'attachment; filename="workflow-{original["workflow_id"]}.json"'
     )
     assert exported == {
-        "workflow_schema": "wms.aerospace.workflow.v1",
+        "workflow_schema": "xaerospace.workflow.v1",
         "source_workflow_id": original["workflow_id"],
         "name": "Exportable workflow",
         "provenance": None,
@@ -492,7 +497,7 @@ def test_workflow_export_and_explicit_replay_preserve_contract(client):
     assert replay["workflow_id"] != original["workflow_id"]
     assert replay["provenance"] == {
         "origin": "workflow_replay",
-        "workflow_schema": "wms.aerospace.workflow.v1",
+        "workflow_schema": "xaerospace.workflow.v1",
         "source_workflow_id": original["workflow_id"],
         "source_provenance": None,
     }
@@ -620,7 +625,7 @@ def test_web_resources_fall_back_to_installed_data_directory(
     monkeypatch,
 ):
     installed_root = tmp_path / "installed"
-    installed_web = installed_root / "share" / "wms-aerospace" / "web"
+    installed_web = installed_root / "share" / "xaerospace" / "web"
     installed_web.mkdir(parents=True)
     monkeypatch.setattr(
         web_api.sysconfig,

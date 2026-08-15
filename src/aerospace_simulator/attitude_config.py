@@ -9,7 +9,7 @@ from typing import Any
 
 from .config import ScenarioValidationError
 
-ATTITUDE_CONTRACT_SCHEMA = "wms.aerospace.spacecraft_attitude.v1"
+ATTITUDE_CONTRACT_SCHEMA = "xaerospace.spacecraft_attitude.v1"
 ATTITUDE_TASK_KINDS = (
     "spacecraft_inertial_pointing_gnc",
     "spacecraft_rate_damping_gnc",

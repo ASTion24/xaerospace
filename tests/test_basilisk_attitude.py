@@ -192,6 +192,6 @@ def test_attitude_outputs_and_request_replay_are_deterministic(
     normalized = json.loads(artifacts["result"].read_text(encoding="utf-8"))
     assert normalized["backend"]["backend_id"] == "basilisk"
     assert normalized["request"]["contract_schema"] == (
-        "wms.aerospace.spacecraft_attitude.v1"
+        "xaerospace.spacecraft_attitude.v1"
     )
     assert replay_artifacts["spacecraft_attitude"].is_file()

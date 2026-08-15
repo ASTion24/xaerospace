@@ -90,6 +90,4 @@ def test_launch_result_exposes_tudat_states_equations_and_outputs(
         path.is_file() and path.stat().st_size > 0 for path in artifacts.values()
     )
     normalized = json.loads(artifacts["result"].read_text(encoding="utf-8"))
-    assert normalized["request"]["contract_schema"] == (
-        "wms.aerospace.launch_to_orbit.v1"
-    )
+    assert normalized["request"]["contract_schema"] == ("xaerospace.launch_to_orbit.v1")

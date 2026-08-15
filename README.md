@@ -6,8 +6,7 @@
 
 RocketPy · TudatPy · JSBSim · Basilisk
 
-[中文使用手册](docs/v0.2.1_product_demo_zh.md) ·
-[PDF 手册（v0.2.0）](docs/Xaerospace_v0.2.0_使用手册.pdf) ·
+[中文使用手册](docs/v0.2.2_product_demo_zh.md) ·
 [统一协议](docs/unified_io_protocol.md) ·
 [Provider 配置](docs/provider_configuration.md)
 
@@ -176,8 +175,8 @@ xaerospace web --provider-profile cloud
 `config/providers.local.json` 与 `config/providers.*.local.json` 已被 Git
 忽略。不要把 API 密钥、私有地址或组织 Header 写入可提交文件。
 
-当前内部仍兼容 `WMS_*` 环境变量和 `wms-aerospace` 命令，便于旧配置迁移。
-新项目和文档统一使用 `Xaerospace` 品牌与 `xaerospace` 命令。
+运行时配置、安装资源、Schema 和浏览器存储统一使用 `Xaerospace` 命名空间。
+命令行入口仅为 `xaerospace`。
 
 ## 能力目录
 
@@ -310,8 +309,7 @@ Hiragino Sans GB、Avenir Next 和 Menlo。
 
 ## 文档
 
-- [完整中文使用手册](docs/v0.2.1_product_demo_zh.md)
-- [PDF 使用手册（v0.2.0）](docs/Xaerospace_v0.2.0_使用手册.pdf)
+- [完整中文使用手册](docs/v0.2.2_product_demo_zh.md)
 - [Provider 配置](docs/provider_configuration.md)
 - [统一输入输出协议](docs/unified_io_protocol.md)
 - [两级发射入轨](docs/two_stage_launch_to_orbit.md)

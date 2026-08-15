@@ -106,8 +106,11 @@ def test_provider_factory_uses_named_profile_without_exposing_endpoint(
     monkeypatch.setenv(PROVIDER_PROFILE_ENV, "cloud")
     monkeypatch.setenv("TEST_CLOUD_API_KEY", "secret-token")
     monkeypatch.setenv("TEST_CLOUD_ORGANIZATION", "test-org")
-    monkeypatch.setenv("WMS_ASSISTANT_LLM_BASE_URL", "http://legacy.test/v1")
-    monkeypatch.setenv("WMS_ASSISTANT_LLM_MODEL", "legacy-model")
+    monkeypatch.setenv(
+        "XAEROSPACE_ASSISTANT_LLM_BASE_URL",
+        "http://direct-environment.test/v1",
+    )
+    monkeypatch.setenv("XAEROSPACE_ASSISTANT_LLM_MODEL", "direct-model")
 
     provider = provider_from_configuration()
 

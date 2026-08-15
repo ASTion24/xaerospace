@@ -39,7 +39,6 @@ release = [
 
 [project.scripts]
 xaerospace = "aerospace_simulator.cli:main"
-wms-aerospace = "aerospace_simulator.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -51,14 +50,14 @@ version = { attr = "aerospace_simulator._version.__version__" }
 aerospace_simulator = ["parameter_definitions.json"]
 
 [tool.setuptools.data-files]
-"share/wms-aerospace/config" = [
+"share/xaerospace/config" = [
     "config/providers.example.json",
     "config/tudatpy-macos-arm64-lock.txt",
 ]
-"share/wms-aerospace/evaluation" = ["evaluation/*.json"]
-"share/wms-aerospace/scenarios" = ["scenarios/*.json"]
-"share/wms-aerospace/scripts" = ["scripts/setup_tudatpy_macos_arm64.sh"]
-"share/wms-aerospace/web" = [
+"share/xaerospace/evaluation" = ["evaluation/*.json"]
+"share/xaerospace/scenarios" = ["scenarios/*.json"]
+"share/xaerospace/scripts" = ["scripts/setup_tudatpy_macos_arm64.sh"]
+"share/xaerospace/web" = [
     "web/*.css",
     "web/*.html",
     "web/*.js",

@@ -310,16 +310,16 @@ class TaskFamilySpec:
     def schema_document(self) -> dict[str, object]:
         schema = TypeAdapter(self.contract_type).json_schema()
         schema["$id"] = self.family_schema
-        schema["x-wms-family-id"] = self.family_id
-        schema["x-wms-contract-schema"] = self.contract_schema
-        schema["x-wms-components"] = [
+        schema["x-xaerospace-family-id"] = self.family_id
+        schema["x-xaerospace-contract-schema"] = self.contract_schema
+        schema["x-xaerospace-components"] = [
             component.document() for component in self.components
         ]
-        schema["x-wms-assistant-parameters"] = [
+        schema["x-xaerospace-assistant-parameters"] = [
             parameter.document() for parameter in self.assistant_parameters
         ]
-        schema["x-wms-parameter-definitions-url"] = "/api/parameter-definitions"
-        schema["x-wms-parameter-definitions"] = parameter_catalog().document(
+        schema["x-xaerospace-parameter-definitions-url"] = "/api/parameter-definitions"
+        schema["x-xaerospace-parameter-definitions"] = parameter_catalog().document(
             family_id=self.family_id
         )
         properties = schema.get("properties")
@@ -1005,7 +1005,7 @@ def _rocket_family() -> TaskFamilySpec:
     )
     return TaskFamilySpec(
         family_id="rocket_flight",
-        family_schema="wms.aerospace.family.rocket_flight.v3",
+        family_schema="xaerospace.family.rocket_flight.v3",
         contract_schema=AEROSPACE_CONTRACT_SCHEMA,
         backend_ids=("rocketpy",),
         contract_type=ScenarioConfig,
@@ -1172,7 +1172,7 @@ def _launch_family() -> TaskFamilySpec:
     task_kind = "two_stage_launch_to_orbit"
     return TaskFamilySpec(
         family_id="launch_to_orbit",
-        family_schema="wms.aerospace.family.launch_to_orbit.v1",
+        family_schema="xaerospace.family.launch_to_orbit.v1",
         contract_schema=LAUNCH_CONTRACT_SCHEMA,
         backend_ids=("tudatpy",),
         contract_type=LaunchToOrbitConfig,
@@ -1253,7 +1253,7 @@ def _orbit_family() -> TaskFamilySpec:
     j2 = "earth_orbit_j2"
     return TaskFamilySpec(
         family_id="orbit_propagation",
-        family_schema="wms.aerospace.family.orbit_propagation.v2",
+        family_schema="xaerospace.family.orbit_propagation.v2",
         contract_schema=ORBIT_CONTRACT_SCHEMA,
         backend_ids=("tudatpy",),
         contract_type=OrbitPropagationConfig,
@@ -1408,7 +1408,7 @@ def _aircraft_family() -> TaskFamilySpec:
     task_kind = "fixed_wing_trimmed_6dof"
     return TaskFamilySpec(
         family_id="aircraft_flight",
-        family_schema="wms.aerospace.family.aircraft_flight.v3",
+        family_schema="xaerospace.family.aircraft_flight.v3",
         contract_schema=AIRCRAFT_CONTRACT_SCHEMA,
         backend_ids=("jsbsim",),
         contract_type=AircraftFlightConfig,
@@ -1583,7 +1583,7 @@ def _spacecraft_family() -> TaskFamilySpec:
     all_tasks = (pointing_task, rate_damping_task)
     return TaskFamilySpec(
         family_id="spacecraft_gnc",
-        family_schema="wms.aerospace.family.spacecraft_gnc.v3",
+        family_schema="xaerospace.family.spacecraft_gnc.v3",
         contract_schema=ATTITUDE_CONTRACT_SCHEMA,
         backend_ids=("basilisk",),
         contract_type=SpacecraftAttitudeConfig,

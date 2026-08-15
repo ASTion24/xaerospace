@@ -92,19 +92,21 @@ def test_family_schema_exposes_variants_and_component_extensions():
     registry = create_default_task_family_registry()
     schema = registry.get("orbit_propagation").schema_document()
 
-    assert schema["$id"] == ("wms.aerospace.family.orbit_propagation.v2")
-    assert schema["x-wms-family-id"] == "orbit_propagation"
+    assert schema["$id"] == ("xaerospace.family.orbit_propagation.v2")
+    assert schema["x-xaerospace-family-id"] == "orbit_propagation"
     assert schema["properties"]["dynamics"]["enum"] == [
         "earth_orbit_two_body",
         "earth_orbit_j2",
     ]
     assert schema["properties"]["backend"]["enum"] == ["tudatpy"]
-    assert schema["x-wms-assistant-parameters"]
-    assert schema["x-wms-parameter-definitions-url"] == ("/api/parameter-definitions")
-    assert schema["x-wms-parameter-definitions"]["recommendedPaths"][
+    assert schema["x-xaerospace-assistant-parameters"]
+    assert schema["x-xaerospace-parameter-definitions-url"] == (
+        "/api/parameter-definitions"
+    )
+    assert schema["x-xaerospace-parameter-definitions"]["recommendedPaths"][
         "orbit_propagation"
     ]
-    assert {item["component_id"] for item in schema["x-wms-components"]} == {
+    assert {item["component_id"] for item in schema["x-xaerospace-components"]} == {
         "orbit.gravity.point_mass",
         "orbit.gravity.spherical_harmonic_j2",
         "orbit.environment.exponential_atmosphere",
@@ -129,7 +131,7 @@ def test_family_registry_cross_checks_backend_component_declarations():
             "single_stage_rigid_body_6dof",
             "single_stage_rigid_body_6dof_recovery",
         ),
-        supported_contract_schemas=("wms.aerospace.scenario.v1",),
+        supported_contract_schemas=("xaerospace.scenario.v1",),
         supported_family_ids=("rocket_flight",),
         supported_component_ids=("rocket.fidelity.point_mass_3dof",),
     )

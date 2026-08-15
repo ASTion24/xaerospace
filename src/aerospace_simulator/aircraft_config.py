@@ -10,7 +10,7 @@ from typing import Any
 
 from .config import ScenarioValidationError
 
-AIRCRAFT_CONTRACT_SCHEMA = "wms.aerospace.aircraft_flight.v1"
+AIRCRAFT_CONTRACT_SCHEMA = "xaerospace.aircraft_flight.v1"
 AIRCRAFT_TASK_KINDS = ("fixed_wing_trimmed_6dof",)
 SUPPORTED_AIRCRAFT_MODELS = ("c172p", "c172r", "c182", "c310", "J3Cub")
 

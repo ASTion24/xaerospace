@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.2
+
+- Removed all pre-release compatibility aliases and standardized runtime
+  configuration on `XAEROSPACE_*`.
+- Standardized contract, task-family, workflow, provenance, JSON Schema
+  extension, browser-storage, and evaluation identifiers on `xaerospace`.
+- Removed the alternate CLI entry point and moved wheel resources to
+  `share/xaerospace`.
+- Added fail-closed tests for removed environment variables and contract
+  schemas, plus wheel inspection that rejects removed namespace tokens.
+- Removed the stale v0.2.0 PDF from the current branch; the v0.2.2 Markdown
+  manual remains the authoritative documentation source.
+
 ## 0.2.1
 
 - Removed import-time FastAPI and SQLite initialization; Uvicorn now invokes
@@ -47,8 +60,7 @@
 ## 0.1.1
 
 - First public release of Xaerospace.
-- Published the Xaerospace Studio brand and `xaerospace` CLI while retaining
-  the previous command and environment-variable identifiers for compatibility.
+- Published the Xaerospace Studio brand and `xaerospace` CLI.
 - Integrated RocketPy, TudatPy, JSBSim, and Basilisk behind one typed protocol.
 - Published 5 task families, 16 real backend variants, 17 reference scenarios,
   the bilingual Web Studio, model/equation reports, and physical plots.
@@ -66,10 +78,8 @@
 - Added a secret-free packaged example configuration.
 - Moved the previously used GLM endpoint and model into an ignored,
   permission-restricted local initial profile.
-- Retained the legacy `WMS_ASSISTANT_LLM_*` environment variables when no
-  Provider JSON is selected.
 - Preserved fail-closed behavior: an invalid selected profile never falls back
-  to another profile or the legacy environment.
+  to another profile or direct environment configuration.
 
 ## 0.1.0
 
