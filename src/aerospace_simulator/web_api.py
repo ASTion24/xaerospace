@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException, Request, Response, status
+from fastapi import FastAPI, HTTPException, Query, Request, Response, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, JsonValue
@@ -42,6 +42,7 @@ from .task_families import (
 from .workflows import (
     MAX_WORKFLOW_TASKS,
     WorkflowArtifactNotFoundError,
+    WorkflowConflictError,
     WorkflowNotFoundError,
     WorkflowStore,
     WorkflowValidationError,
@@ -482,6 +483,24 @@ def create_app(
             ) from exc
         return result
 
+    @application.get("/api/workflows")
+    def workflow_history(
+        limit: int = 50,
+        offset: int = 0,
+        status_filter: str | None = Query(default=None, alias="status"),
+    ) -> dict[str, object]:
+        try:
+            return active_store.list(
+                limit=limit,
+                offset=offset,
+                status=status_filter,
+            )
+        except WorkflowValidationError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=str(exc),
+            ) from exc
+
     @application.post(
         "/api/workflow-replays",
         status_code=status.HTTP_202_ACCEPTED,
@@ -547,6 +566,25 @@ def create_app(
                 detail=str(exc),
             ) from exc
         return result
+
+    @application.delete(
+        "/api/workflows/{workflow_id}",
+        status_code=status.HTTP_204_NO_CONTENT,
+    )
+    def delete_workflow(workflow_id: str) -> Response:
+        try:
+            active_store.delete(workflow_id)
+        except WorkflowNotFoundError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=str(exc),
+            ) from exc
+        except WorkflowConflictError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=str(exc),
+            ) from exc
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
 
     @application.get(
         "/api/workflows/{workflow_id}/tasks/{task_id}/artifacts/{artifact_name}"

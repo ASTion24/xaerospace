@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.0
+
+- Added a SQLite-backed durable workspace without replacing the existing
+  `WorkflowStore` or file-based result layout.
+- Restored completed workflows and verified artifacts after service restarts.
+- Marked unfinished work as `interrupted` after a process stop; no task is
+  resumed or retried automatically.
+- Added SHA-256 artifact integrity metadata and download-time verification.
+- Added paginated workflow history, status filtering, and terminal-workflow
+  deletion APIs.
+- Added a compact bilingual history panel with refresh recovery, explicit open,
+  and confirmed deletion actions.
+- Added process-level crash recovery, schema-version, path-boundary, integrity,
+  deletion, API, and browser acceptance coverage.
+
 ## 0.1.2
 
 - Moved installed runtime state, workflow artifacts, and the isolated TudatPy

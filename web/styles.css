@@ -880,6 +880,67 @@ h4 {
   font-size: 12px;
 }
 
+.workflow-history {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(7, 14, 19, 0.76);
+}
+
+.workflow-history[hidden] {
+  display: none;
+}
+
+.workflow-history-list {
+  max-height: 278px;
+  display: grid;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.workflow-history-item {
+  min-height: 58px;
+  padding: 7px 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: rgba(18, 35, 49, 0.62);
+}
+
+.workflow-history-open {
+  min-width: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 9px;
+  border: 0;
+  color: var(--text);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workflow-history-open strong,
+.workflow-history-open small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-history-open strong {
+  font-size: 11px;
+}
+
+.workflow-history-open small {
+  grid-column: 2;
+  color: var(--text-faint);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 8px;
+}
+
 .execution-contract {
   min-height: 60px;
   padding: 10px 12px;
@@ -1097,6 +1158,7 @@ h4 {
 }
 
 .task-status.failed::before,
+.task-status.interrupted::before,
 .task-status.skipped::before {
   background: var(--red);
 }
@@ -1401,7 +1463,8 @@ h4 {
   background: rgba(100, 214, 155, 0.08);
 }
 
-.run-status.failed {
+.run-status.failed,
+.run-status.interrupted {
   border-color: rgba(255, 123, 120, 0.3);
   color: #ff9a97;
   background: rgba(255, 123, 120, 0.08);
@@ -2753,6 +2816,7 @@ body {
   }
 
   .workflow-meta,
+  .workflow-history,
   .queue-section {
     padding-right: 13px;
     padding-left: 13px;

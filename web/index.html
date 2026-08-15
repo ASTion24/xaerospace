@@ -286,6 +286,14 @@
             <div class="workflow-actions">
               <button
                 class="button button-ghost button-compact"
+                id="toggleWorkflowHistory"
+                type="button"
+                data-i18n="workflowHistory"
+              >
+                历史
+              </button>
+              <button
+                class="button button-ghost button-compact"
                 id="replayWorkflow"
                 type="button"
                 data-i18n="replayWorkflow"
@@ -345,6 +353,28 @@
               >
             </div>
           </div>
+
+          <section class="workflow-history" id="workflowHistoryPanel" hidden>
+            <div class="section-heading">
+              <div>
+                <h3 data-i18n="workflowHistoryTitle">工作流历史</h3>
+                <p data-i18n="workflowHistoryHelp">
+                  服务重启后仍可查看结果、导出合同或显式重放。
+                </p>
+              </div>
+              <button
+                class="icon-button"
+                id="refreshWorkflowHistory"
+                type="button"
+                title="刷新历史"
+                aria-label="刷新历史"
+                data-i18n-aria-label="workflowHistoryRefresh"
+              >
+                &#8635;
+              </button>
+            </div>
+            <div class="workflow-history-list" id="workflowHistoryList"></div>
+          </section>
 
           <section class="quick-start" id="quickStartGuide">
             <div class="quick-start-heading">

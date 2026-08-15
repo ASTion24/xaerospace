@@ -2,6 +2,7 @@
 
 const LOCALE_STORAGE_KEY = "wms-aerospace-locale";
 const ASSISTANT_SESSION_STORAGE_KEY = "wms-aerospace-assistant-session";
+const WORKFLOW_STORAGE_KEY = "xaerospace-active-workflow";
 const SUPPORTED_LOCALES = new Set(["zh-CN", "en"]);
 const translations = globalThis.WMS_I18N;
 let parameterGuide = null;
@@ -32,6 +33,8 @@ const state = {
   showAdvancedParameters: false,
   tasks: [],
   workflow: null,
+  workflowHistory: [],
+  workflowHistoryOpen: false,
   selectedResultTaskId: null,
   polling: false,
 };
@@ -43,6 +46,7 @@ const statusTranslationKeys = {
   running: "statusRunning",
   completed: "statusCompleted",
   failed: "statusFailed",
+  interrupted: "statusInterrupted",
   skipped: "statusSkipped",
   idle: "statusIdle",
 };
@@ -82,6 +86,10 @@ function bindElements() {
     "backendFilters",
     "libraryList",
     "workflowName",
+    "toggleWorkflowHistory",
+    "workflowHistoryPanel",
+    "workflowHistoryList",
+    "refreshWorkflowHistory",
     "quickStartProgress",
     "quickStartSource",
     "quickStartConfigure",
@@ -266,6 +274,18 @@ function bindEvents() {
     "click",
     exportWorkflowDocument,
   );
+  elements.toggleWorkflowHistory.addEventListener(
+    "click",
+    toggleWorkflowHistory,
+  );
+  elements.refreshWorkflowHistory.addEventListener(
+    "click",
+    loadWorkflowHistory,
+  );
+  elements.workflowHistoryList.addEventListener(
+    "click",
+    handleWorkflowHistoryAction,
+  );
   elements.clearWorkflow.addEventListener("click", clearWorkflow);
   elements.runWorkflow.addEventListener("click", runWorkflow);
 
@@ -337,6 +357,7 @@ async function initialize() {
       parameterDefinitions,
       assistantStatus,
       assistantSession,
+      restoredWorkflow,
     ] = await Promise.all([
         api("/api/health"),
         api("/api/capabilities"),
@@ -345,6 +366,7 @@ async function initialize() {
         api("/api/parameter-definitions"),
         api("/api/assistant/status"),
         restoreAssistantSession(),
+        restoreActiveWorkflow(),
       ]);
     parameterGuide = parameterDefinitions;
     state.capabilities = capabilities.backends;
@@ -370,7 +392,15 @@ async function initialize() {
     renderAssistant();
     renderBackendFilters();
     renderLibrary();
-    if (state.taskFamilies.length > 0) {
+    renderWorkflowHistory();
+    if (restoredWorkflow) {
+      await applyRestoredWorkflow(restoredWorkflow);
+      renderQueue();
+      renderInspector();
+      if (!isTerminalStatus(restoredWorkflow.status)) {
+        pollWorkflow();
+      }
+    } else if (state.taskFamilies.length > 0) {
       const defaultFamily =
         state.taskFamilies.find(
           (item) => item.family_id === "rocket_flight",
@@ -567,6 +597,7 @@ async function confirmAndRunNaturalLanguageDraft() {
     state.selectedResultTaskId = taskId;
     elements.workflowName.value = workflow.name;
     rememberAssistantSession(confirmedSession.session_id);
+    rememberActiveWorkflow(workflow.workflow_id);
     setWorkbenchView("results");
     renderQueue();
     renderInspector();
@@ -1988,6 +2019,7 @@ function clearWorkflow() {
   state.tasks = [];
   state.selectedTaskId = null;
   state.workflow = null;
+  rememberActiveWorkflow(null);
   state.selectedResultTaskId = null;
   setWorkbenchView("editor");
   renderQueue();
@@ -2035,6 +2067,177 @@ async function exportWorkflowDocument() {
   updateControls();
 }
 
+async function toggleWorkflowHistory() {
+  state.workflowHistoryOpen = !state.workflowHistoryOpen;
+  elements.workflowHistoryPanel.hidden = !state.workflowHistoryOpen;
+  if (state.workflowHistoryOpen) {
+    await loadWorkflowHistory();
+  }
+}
+
+async function loadWorkflowHistory() {
+  elements.workflowHistoryList.innerHTML = emptyMarkup(
+    t("workflowHistoryLoading"),
+    "",
+  );
+  try {
+    const history = await api("/api/workflows?limit=50");
+    state.workflowHistory = history.workflows || [];
+    renderWorkflowHistory();
+  } catch (error) {
+    elements.workflowHistoryList.innerHTML = emptyMarkup(
+      t("workflowHistoryLoadFailed"),
+      error.message,
+    );
+  }
+}
+
+function renderWorkflowHistory() {
+  elements.workflowHistoryPanel.hidden = !state.workflowHistoryOpen;
+  if (!state.workflowHistoryOpen) {
+    return;
+  }
+  if (state.workflowHistory.length === 0) {
+    elements.workflowHistoryList.innerHTML = emptyMarkup(
+      t("workflowHistoryEmpty"),
+      t("workflowHistoryEmptyHelp"),
+    );
+    return;
+  }
+  elements.workflowHistoryList.innerHTML = state.workflowHistory
+    .map((workflow) => {
+      const created = new Intl.DateTimeFormat(state.locale, {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(new Date(workflow.created_at));
+      return `
+        <article class="workflow-history-item">
+          <button
+            class="workflow-history-open"
+            type="button"
+            data-history-action="open"
+            data-workflow-id="${escapeHTML(workflow.workflow_id)}"
+          >
+            <span class="run-status ${escapeHTML(workflow.status)}">
+              ${escapeHTML(statusLabel(workflow.status))}
+            </span>
+            <strong>${escapeHTML(workflow.name)}</strong>
+            <small>
+              ${escapeHTML(created)} ·
+              ${escapeHTML(t("workflowHistoryTaskCount", {
+                count: workflow.task_count,
+              }))} ·
+              ${escapeHTML(workflow.backends.join(" / "))}
+            </small>
+          </button>
+          <button
+            class="icon-button"
+            type="button"
+            data-history-action="delete"
+            data-workflow-id="${escapeHTML(workflow.workflow_id)}"
+            title="${escapeHTML(t("workflowHistoryDelete"))}"
+            aria-label="${escapeHTML(t("workflowHistoryDelete"))}"
+          >&times;</button>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+async function handleWorkflowHistoryAction(event) {
+  const button = event.target.closest("[data-history-action]");
+  if (!button) {
+    return;
+  }
+  const workflowId = button.dataset.workflowId;
+  if (button.dataset.historyAction === "open") {
+    await openWorkflowHistory(workflowId);
+  } else if (button.dataset.historyAction === "delete") {
+    await deleteWorkflowHistory(workflowId);
+  }
+}
+
+async function openWorkflowHistory(workflowId) {
+  if (isWorkflowActive()) {
+    toast(t("workflowHistoryActiveLocked"), "error");
+    return;
+  }
+  try {
+    const workflow = await api(
+      `/api/workflows/${encodeURIComponent(workflowId)}`,
+    );
+    await applyRestoredWorkflow(workflow);
+    state.workflowHistoryOpen = false;
+    renderWorkflowHistory();
+    renderQueue();
+    renderInspector();
+    updateControls();
+    if (!isTerminalStatus(workflow.status)) {
+      pollWorkflow();
+    }
+  } catch (error) {
+    toast(error.message, "error");
+  }
+}
+
+async function deleteWorkflowHistory(workflowId) {
+  if (state.workflow?.workflow_id === workflowId && isWorkflowActive()) {
+    toast(t("workflowHistoryActiveLocked"), "error");
+    return;
+  }
+  const workflow = state.workflowHistory.find(
+    (item) => item.workflow_id === workflowId,
+  );
+  if (
+    !globalThis.confirm(
+      t("workflowHistoryDeleteConfirm", {
+        name: workflow?.name || workflowId,
+      }),
+    )
+  ) {
+    return;
+  }
+  try {
+    await api(`/api/workflows/${encodeURIComponent(workflowId)}`, {
+      method: "DELETE",
+    });
+    if (state.workflow?.workflow_id === workflowId) {
+      state.workflow = null;
+      state.tasks = [];
+      state.selectedTaskId = null;
+      state.selectedResultTaskId = null;
+      rememberActiveWorkflow(null);
+      setWorkbenchView("editor");
+      clearEditor();
+      renderQueue();
+      renderInspector();
+    }
+    toast(t("workflowHistoryDeleted"), "success");
+    await loadWorkflowHistory();
+  } catch (error) {
+    toast(error.message, "error");
+  }
+}
+
+async function applyRestoredWorkflow(workflow) {
+  const exported = await api(
+    `/api/workflows/${encodeURIComponent(workflow.workflow_id)}/export`,
+  );
+  state.workflow = workflow;
+  state.tasks = exported.tasks.map((task) => ({
+    task_id: task.task_id,
+    document: JSON.parse(JSON.stringify(task.document)),
+    handover: task.handover
+      ? JSON.parse(JSON.stringify(task.handover))
+      : null,
+  }));
+  state.selectedTaskId = state.tasks[0]?.task_id || null;
+  state.selectedResultTaskId = workflow.tasks[0]?.task_id || null;
+  elements.workflowName.value = workflow.name;
+  rememberActiveWorkflow(workflow.workflow_id);
+  setWorkbenchView("results");
+}
+
 async function replayWorkflowDocument() {
   const [file] = elements.replayWorkflowFile.files;
   elements.replayWorkflowFile.value = "";
@@ -2067,6 +2270,7 @@ async function replayWorkflowDocument() {
         : null,
     }));
     state.workflow = workflow;
+    rememberActiveWorkflow(workflow.workflow_id);
     state.selectedTaskId = state.tasks[0]?.task_id || null;
     state.selectedResultTaskId = workflow.tasks[0]?.task_id || null;
     elements.workflowName.value = workflow.name;
@@ -2077,6 +2281,7 @@ async function replayWorkflowDocument() {
     pollWorkflow();
   } catch (error) {
     state.workflow = null;
+    rememberActiveWorkflow(null);
     const message = t("workflowReplayFailed", {
       message: error.message,
     });
@@ -2118,6 +2323,7 @@ async function runWorkflow() {
         tasks: state.tasks,
       }),
     });
+    rememberActiveWorkflow(state.workflow.workflow_id);
     state.selectedResultTaskId = state.workflow.tasks[0]?.task_id || null;
     setWorkbenchView("results");
     renderQueue();
@@ -2127,6 +2333,7 @@ async function runWorkflow() {
   } catch (error) {
     toast(error.message, "error");
     state.workflow = null;
+    rememberActiveWorkflow(null);
     renderInspector();
     updateControls();
   }
@@ -2141,6 +2348,7 @@ async function pollWorkflow() {
     state.workflow = await api(
       `/api/workflows/${encodeURIComponent(state.workflow.workflow_id)}`,
     );
+    rememberActiveWorkflow(state.workflow.workflow_id);
     renderQueue();
     renderInspector();
   } catch (error) {
@@ -2155,6 +2363,8 @@ async function pollWorkflow() {
       toast(t("workflowCompleted"), "success");
     } else if (state.workflow?.status === "failed") {
       toast(t("workflowFailed"), "error");
+    } else if (state.workflow?.status === "interrupted") {
+      toast(t("workflowInterrupted"), "error");
     }
   }
 }
@@ -2712,6 +2922,36 @@ async function restoreAssistantSession() {
   }
 }
 
+async function restoreActiveWorkflow() {
+  let workflowId = null;
+  try {
+    workflowId = globalThis.localStorage.getItem(WORKFLOW_STORAGE_KEY);
+  } catch {
+    workflowId = null;
+  }
+  if (!workflowId) {
+    return null;
+  }
+  try {
+    return await api(`/api/workflows/${encodeURIComponent(workflowId)}`);
+  } catch {
+    rememberActiveWorkflow(null);
+    return null;
+  }
+}
+
+function rememberActiveWorkflow(workflowId) {
+  try {
+    if (workflowId) {
+      globalThis.localStorage.setItem(WORKFLOW_STORAGE_KEY, workflowId);
+    } else {
+      globalThis.localStorage.removeItem(WORKFLOW_STORAGE_KEY);
+    }
+  } catch {
+    // Durable history remains available from the server.
+  }
+}
+
 function rememberAssistantSession(sessionId) {
   try {
     if (sessionId) {
@@ -2764,6 +3004,9 @@ function applyLocale() {
     "[data-i18n-aria-label]",
   )) {
     element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+    if (element.hasAttribute("title")) {
+      element.setAttribute("title", t(element.dataset.i18nAriaLabel));
+    }
   }
   for (const button of elements.languageSwitcher.querySelectorAll(
     "[data-locale]",
@@ -2790,6 +3033,7 @@ function applyLocale() {
   if (state.taskFamilies.length > 0 || state.scenarios.length > 0) {
     renderLibrary();
   }
+  renderWorkflowHistory();
   renderQueue();
   refreshEditorLocale();
   renderFamilyVariantControl();
@@ -3000,7 +3244,11 @@ function parseEditorDocumentSilently() {
 }
 
 function isTerminalStatus(status) {
-  return status === "completed" || status === "failed";
+  return (
+    status === "completed" ||
+    status === "failed" ||
+    status === "interrupted"
+  );
 }
 
 function emptyMarkup(title, detail) {
