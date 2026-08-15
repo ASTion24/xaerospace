@@ -17,27 +17,45 @@ class WorkspaceDatabaseError(RuntimeError):
 class WorkspaceDatabase:
     def __init__(self, path: str | Path) -> None:
         self.path = Path(path)
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self._connection = sqlite3.connect(
-            self.path,
-            timeout=30.0,
-            check_same_thread=False,
-        )
-        self._connection.row_factory = sqlite3.Row
-        self._connection.execute("PRAGMA journal_mode = WAL")
-        self._connection.execute("PRAGMA synchronous = FULL")
-        self._connection.execute("PRAGMA foreign_keys = ON")
-        self._connection.execute("PRAGMA busy_timeout = 30000")
-        self._migrate()
+        connection: sqlite3.Connection | None = None
+        try:
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            connection = sqlite3.connect(
+                self.path,
+                timeout=30.0,
+                check_same_thread=False,
+            )
+            self._connection = connection
+            self._connection.row_factory = sqlite3.Row
+            self._connection.execute("PRAGMA journal_mode = WAL")
+            self._connection.execute("PRAGMA synchronous = FULL")
+            self._connection.execute("PRAGMA foreign_keys = ON")
+            self._connection.execute("PRAGMA busy_timeout = 30000")
+            self._migrate()
+        except WorkspaceDatabaseError:
+            if connection is not None:
+                connection.close()
+            raise
+        except (OSError, sqlite3.Error) as exc:
+            if connection is not None:
+                connection.close()
+            raise WorkspaceDatabaseError(
+                f"unable to initialize workspace database: {self.path}"
+            ) from exc
 
     def load_workflows(self) -> list[dict[str, object]]:
-        rows = self._connection.execute(
-            """
-            SELECT workflow_id, record_json
-            FROM workflows
-            ORDER BY created_at ASC, workflow_id ASC
-            """
-        ).fetchall()
+        try:
+            rows = self._connection.execute(
+                """
+                SELECT workflow_id, record_json
+                FROM workflows
+                ORDER BY created_at ASC, workflow_id ASC
+                """
+            ).fetchall()
+        except sqlite3.Error as exc:
+            raise WorkspaceDatabaseError(
+                f"unable to read workspace database: {self.path}"
+            ) from exc
         documents: list[dict[str, object]] = []
         for row in rows:
             try:
@@ -70,34 +88,44 @@ class WorkspaceDatabase:
             separators=(",", ":"),
             sort_keys=True,
         )
-        with self._connection:
-            self._connection.execute(
-                """
-                INSERT INTO workflows (
-                    workflow_id,
-                    name,
-                    status,
-                    created_at,
-                    updated_at,
-                    record_json
+        try:
+            with self._connection:
+                self._connection.execute(
+                    """
+                    INSERT INTO workflows (
+                        workflow_id,
+                        name,
+                        status,
+                        created_at,
+                        updated_at,
+                        record_json
+                    )
+                    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+                    ON CONFLICT(workflow_id) DO UPDATE SET
+                        name = excluded.name,
+                        status = excluded.status,
+                        created_at = excluded.created_at,
+                        updated_at = CURRENT_TIMESTAMP,
+                        record_json = excluded.record_json
+                    """,
+                    (workflow_id, name, status, created_at, payload),
                 )
-                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
-                ON CONFLICT(workflow_id) DO UPDATE SET
-                    name = excluded.name,
-                    status = excluded.status,
-                    created_at = excluded.created_at,
-                    updated_at = CURRENT_TIMESTAMP,
-                    record_json = excluded.record_json
-                """,
-                (workflow_id, name, status, created_at, payload),
-            )
+        except sqlite3.Error as exc:
+            raise WorkspaceDatabaseError(
+                f"unable to update workspace database: {self.path}"
+            ) from exc
 
     def delete_workflow(self, workflow_id: str) -> None:
-        with self._connection:
-            cursor = self._connection.execute(
-                "DELETE FROM workflows WHERE workflow_id = ?",
-                (workflow_id,),
-            )
+        try:
+            with self._connection:
+                cursor = self._connection.execute(
+                    "DELETE FROM workflows WHERE workflow_id = ?",
+                    (workflow_id,),
+                )
+        except sqlite3.Error as exc:
+            raise WorkspaceDatabaseError(
+                f"unable to delete from workspace database: {self.path}"
+            ) from exc
         if cursor.rowcount != 1:
             raise WorkspaceDatabaseError(
                 f"workflow disappeared during deletion: {workflow_id}"

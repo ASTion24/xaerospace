@@ -803,6 +803,3 @@ def _media_type(path: Path) -> str:
     }
     result = media_types.get(path.suffix.lower(), "application/octet-stream")
     return result
-
-
-app = create_app()

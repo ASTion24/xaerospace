@@ -1,3 +1,6 @@
+import os
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -23,6 +26,21 @@ def client(tmp_path):
     )
     with TestClient(app) as test_client:
         yield test_client
+
+
+def test_importing_web_api_does_not_create_user_data(tmp_path):
+    data_root = tmp_path / "must-not-exist"
+    environment = os.environ.copy()
+    environment["XAEROSPACE_HOME"] = str(data_root)
+
+    subprocess.run(
+        [sys.executable, "-c", "import aerospace_simulator.web_api"],
+        cwd=PROJECT_ROOT,
+        env=environment,
+        check=True,
+    )
+
+    assert not data_root.exists()
 
 
 def test_web_application_serves_catalog_capabilities_and_static_assets(client):

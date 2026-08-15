@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.1
+
+- Removed import-time FastAPI and SQLite initialization; Uvicorn now invokes
+  `create_app` through its application-factory mode.
+- Normalized workspace directory, connection, migration, read, update, and
+  deletion failures as `WorkspaceDatabaseError`.
+- Added regression coverage proving that importing `web_api` does not create
+  the configured user-data directory.
+- Expanded the installed-wheel smoke test to execute, restore, verify, corrupt,
+  reject, delete, and re-check a persisted RocketPy workflow.
+- Corrected the manual's stale statement about `WorkflowStore` persistence.
+
 ## 0.2.0
 
 - Added a SQLite-backed durable workspace without replacing the existing
