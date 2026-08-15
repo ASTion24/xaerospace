@@ -28,7 +28,7 @@ from .orbit_config import (
 )
 from .protocol import PROTOCOL_VERSION, ProtocolValidationError, SimulationRequest
 
-AEROSPACE_CONTRACT_SCHEMA = "wms.aerospace.scenario.v1"
+AEROSPACE_CONTRACT_SCHEMA = "xaerospace.scenario.v1"
 
 
 def request_from_scenario(

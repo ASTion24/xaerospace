@@ -112,10 +112,9 @@ def _smoke_environment(data_root: Path) -> dict[str, str]:
     environment["PYTHONPATH"] = os.pathsep.join(filtered)
     environment["PYTHONNOUSERSITE"] = "1"
     environment["XAEROSPACE_HOME"] = str(data_root)
-    environment.pop("WMS_AEROSPACE_HOME", None)
-    environment.pop("WMS_AEROSPACE_RUN_DIR", None)
-    environment.pop("WMS_TUDATPY_PYTHON", None)
-    environment.pop("WMS_TUDAT_HOME", None)
+    environment.pop("XAEROSPACE_RUN_DIR", None)
+    environment.pop("XAEROSPACE_TUDATPY_PYTHON", None)
+    environment.pop("XAEROSPACE_TUDAT_HOME", None)
     return environment
 
 

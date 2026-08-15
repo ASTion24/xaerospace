@@ -9,7 +9,7 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOCK_FILE="${SCRIPT_DIR}/../config/tudatpy-macos-arm64-lock.txt"
-DATA_ROOT="${XAEROSPACE_HOME:-${WMS_AEROSPACE_HOME:-${HOME}/Library/Application Support/Xaerospace}}"
+DATA_ROOT="${XAEROSPACE_HOME:-${HOME}/Library/Application Support/Xaerospace}"
 RUNTIME_ROOT="${DATA_ROOT}/runtime/tudat"
 TOOLS_DIR="${RUNTIME_ROOT}/tools"
 MAMBA_ROOT="${RUNTIME_ROOT}/mamba-root"

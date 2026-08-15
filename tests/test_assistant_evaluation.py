@@ -170,8 +170,8 @@ def test_assistant_evaluation_cli_is_explicitly_provider_gated(
     )
     assert parsed.command == "assistant-eval"
     assert parsed.tags == ["routing"]
-    monkeypatch.delenv("WMS_ASSISTANT_LLM_BASE_URL", raising=False)
-    monkeypatch.delenv("WMS_ASSISTANT_LLM_MODEL", raising=False)
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_BASE_URL", raising=False)
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_MODEL", raising=False)
     monkeypatch.delenv(PROVIDER_CONFIG_ENV, raising=False)
     monkeypatch.delenv(PROVIDER_PROFILE_ENV, raising=False)
     monkeypatch.setattr(

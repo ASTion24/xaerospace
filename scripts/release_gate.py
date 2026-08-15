@@ -19,13 +19,19 @@ BUILD_REQUIREMENTS = {
 REQUIRED_WHEEL_SUFFIXES = (
     "aerospace_simulator/_version.py",
     "aerospace_simulator/parameter_definitions.json",
-    "share/wms-aerospace/config/providers.example.json",
-    "share/wms-aerospace/config/tudatpy-macos-arm64-lock.txt",
-    "share/wms-aerospace/scripts/setup_tudatpy_macos_arm64.sh",
-    "share/wms-aerospace/web/app.js",
-    "share/wms-aerospace/web/i18n.js",
-    "share/wms-aerospace/web/index.html",
-    "share/wms-aerospace/web/styles.css",
+    "share/xaerospace/config/providers.example.json",
+    "share/xaerospace/config/tudatpy-macos-arm64-lock.txt",
+    "share/xaerospace/scripts/setup_tudatpy_macos_arm64.sh",
+    "share/xaerospace/web/app.js",
+    "share/xaerospace/web/i18n.js",
+    "share/xaerospace/web/index.html",
+    "share/xaerospace/web/styles.css",
+)
+REMOVED_NAMESPACE_TOKENS = (
+    b"WMS_",
+    b"wms-",
+    b"wms.",
+    b"x-wms-",
 )
 
 
@@ -36,8 +42,8 @@ def main() -> int:
     _run([sys.executable, "-m", "pytest", "-q"])
 
     with (
-        tempfile.TemporaryDirectory(prefix="wms-release-a-") as first_dir,
-        tempfile.TemporaryDirectory(prefix="wms-release-b-") as second_dir,
+        tempfile.TemporaryDirectory(prefix="xaerospace-release-a-") as first_dir,
+        tempfile.TemporaryDirectory(prefix="xaerospace-release-b-") as second_dir,
     ):
         first = _build_wheel(Path(first_dir))
         second = _build_wheel(Path(second_dir))
@@ -114,6 +120,7 @@ def _build_wheel(destination: Path) -> Path:
 def _inspect_wheel(path: Path) -> None:
     with zipfile.ZipFile(path) as archive:
         names = archive.namelist()
+        removed_references = _removed_namespace_references(archive, names)
     missing = [
         suffix
         for suffix in REQUIRED_WHEEL_SUFFIXES
@@ -125,14 +132,36 @@ def _inspect_wheel(path: Path) -> None:
         raise RuntimeError("wheel still contains the removed parameter-guide.js")
     if any(name.endswith("providers.local.json") for name in names):
         raise RuntimeError("wheel contains a local Provider configuration")
+    if removed_references:
+        raise RuntimeError(
+            "wheel contains removed WMS namespace references: "
+            + ", ".join(removed_references)
+        )
     scenario_count = sum(
-        "/share/wms-aerospace/scenarios/" in f"/{name}" and name.endswith(".json")
+        "/share/xaerospace/scenarios/" in f"/{name}" and name.endswith(".json")
         for name in names
     )
     if scenario_count != 17:
         raise RuntimeError(
             f"wheel must contain 17 bundled scenarios, found {scenario_count}"
         )
+
+
+def _removed_namespace_references(
+    archive: zipfile.ZipFile,
+    names: list[str],
+) -> list[str]:
+    references: list[str] = []
+    for name in names:
+        if any(token.decode() in name for token in REMOVED_NAMESPACE_TOKENS):
+            references.append(name)
+            continue
+        if not name.endswith((".css", ".html", ".json", ".js", ".py", ".sh", ".txt")):
+            continue
+        payload = archive.read(name)
+        if any(token in payload for token in REMOVED_NAMESPACE_TOKENS):
+            references.append(name)
+    return references
 
 
 def _smoke_test_wheel(path: Path) -> None:

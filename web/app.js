@@ -1,10 +1,10 @@
 "use strict";
 
-const LOCALE_STORAGE_KEY = "wms-aerospace-locale";
-const ASSISTANT_SESSION_STORAGE_KEY = "wms-aerospace-assistant-session";
+const LOCALE_STORAGE_KEY = "xaerospace-locale";
+const ASSISTANT_SESSION_STORAGE_KEY = "xaerospace-assistant-session";
 const WORKFLOW_STORAGE_KEY = "xaerospace-active-workflow";
 const SUPPORTED_LOCALES = new Set(["zh-CN", "en"]);
-const translations = globalThis.WMS_I18N;
+const translations = globalThis.XAEROSPACE_I18N;
 let parameterGuide = null;
 
 const state = {

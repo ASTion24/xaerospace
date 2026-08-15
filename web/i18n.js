@@ -1,6 +1,6 @@
 "use strict";
 
-globalThis.WMS_I18N = Object.freeze({
+globalThis.XAEROSPACE_I18N = Object.freeze({
   "zh-CN": {
     strings: {
       documentTitle: "Xaerospace 航空航天仿真工作台",

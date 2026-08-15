@@ -26,9 +26,9 @@ from .workspace_database import WorkspaceDatabase, WorkspaceDatabaseError
 
 MAX_WORKFLOW_TASKS = 12
 MAX_WORKFLOW_HISTORY_PAGE_SIZE = 100
-WORKFLOW_EXPORT_SCHEMA = "wms.aerospace.workflow.v1"
-WORKFLOW_RECORD_SCHEMA = "wms.aerospace.workflow_record.v1"
-ASSISTANT_PROVENANCE_SCHEMA = "wms.aerospace.assistant_provenance.v1"
+WORKFLOW_EXPORT_SCHEMA = "xaerospace.workflow.v1"
+WORKFLOW_RECORD_SCHEMA = "xaerospace.workflow_record.v1"
+ASSISTANT_PROVENANCE_SCHEMA = "xaerospace.assistant_provenance.v1"
 _TASK_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _TERMINAL_WORKFLOW_STATES = {"completed", "failed", "interrupted"}
 _TERMINAL_TASK_STATES = {"completed", "failed", "skipped", "interrupted"}

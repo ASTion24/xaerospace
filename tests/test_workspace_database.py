@@ -131,7 +131,7 @@ def _workflow_record() -> dict[str, object]:
     return json.loads(
         """
         {
-          "record_schema": "wms.aerospace.workflow_record.v1",
+          "record_schema": "xaerospace.workflow_record.v1",
           "workflow_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
           "name": "Persistent workflow",
           "status": "completed",

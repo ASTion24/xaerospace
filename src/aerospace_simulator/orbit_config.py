@@ -9,7 +9,7 @@ from typing import Any
 
 from .config import ScenarioValidationError
 
-ORBIT_CONTRACT_SCHEMA = "wms.aerospace.orbit_propagation.v2"
+ORBIT_CONTRACT_SCHEMA = "xaerospace.orbit_propagation.v2"
 ORBIT_TASK_KINDS = ("earth_orbit_two_body", "earth_orbit_j2")
 
 

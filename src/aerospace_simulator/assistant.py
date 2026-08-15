@@ -252,95 +252,103 @@ class OpenAICompatibleConfig:
 
     @classmethod
     def from_environment(cls) -> OpenAICompatibleConfig | None:
-        base_url = os.environ.get("WMS_ASSISTANT_LLM_BASE_URL", "").strip()
-        model = os.environ.get("WMS_ASSISTANT_LLM_MODEL", "").strip()
+        base_url = os.environ.get(
+            "XAEROSPACE_ASSISTANT_LLM_BASE_URL",
+            "",
+        ).strip()
+        model = os.environ.get("XAEROSPACE_ASSISTANT_LLM_MODEL", "").strip()
         if not base_url and not model:
             return None
         if not base_url or not model:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_BASE_URL and WMS_ASSISTANT_LLM_MODEL "
+                "XAEROSPACE_ASSISTANT_LLM_BASE_URL and "
+                "XAEROSPACE_ASSISTANT_LLM_MODEL "
                 "must be configured together"
             )
         parsed = urlparse(base_url)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_BASE_URL must be an absolute HTTP(S) URL"
+                "XAEROSPACE_ASSISTANT_LLM_BASE_URL must be an absolute HTTP(S) URL"
             )
         try:
             timeout_s = float(
-                os.environ.get("WMS_ASSISTANT_LLM_TIMEOUT_S", "45").strip()
+                os.environ.get(
+                    "XAEROSPACE_ASSISTANT_LLM_TIMEOUT_S",
+                    "45",
+                ).strip()
             )
         except ValueError as exc:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_TIMEOUT_S must be a number"
+                "XAEROSPACE_ASSISTANT_LLM_TIMEOUT_S must be a number"
             ) from exc
         if not 1.0 <= timeout_s <= 120.0:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_TIMEOUT_S must be in [1, 120]"
+                "XAEROSPACE_ASSISTANT_LLM_TIMEOUT_S must be in [1, 120]"
             )
         compatibility_mode = os.environ.get(
-            "WMS_ASSISTANT_LLM_COMPATIBILITY_MODE",
+            "XAEROSPACE_ASSISTANT_LLM_COMPATIBILITY_MODE",
             "strict",
         ).strip()
         if compatibility_mode not in {"strict", "llama_cpp"}:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_COMPATIBILITY_MODE must be 'strict' or 'llama_cpp'"
+                "XAEROSPACE_ASSISTANT_LLM_COMPATIBILITY_MODE must be "
+                "'strict' or 'llama_cpp'"
             )
         try:
             max_concurrency = int(
                 os.environ.get(
-                    "WMS_ASSISTANT_LLM_MAX_CONCURRENCY",
+                    "XAEROSPACE_ASSISTANT_LLM_MAX_CONCURRENCY",
                     "1",
                 ).strip()
             )
         except ValueError as exc:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_MAX_CONCURRENCY must be an integer"
+                "XAEROSPACE_ASSISTANT_LLM_MAX_CONCURRENCY must be an integer"
             ) from exc
         if not 1 <= max_concurrency <= 8:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_MAX_CONCURRENCY must be in [1, 8]"
+                "XAEROSPACE_ASSISTANT_LLM_MAX_CONCURRENCY must be in [1, 8]"
             )
         try:
             health_timeout_s = float(
                 os.environ.get(
-                    "WMS_ASSISTANT_LLM_HEALTH_TIMEOUT_S",
+                    "XAEROSPACE_ASSISTANT_LLM_HEALTH_TIMEOUT_S",
                     "10",
                 ).strip()
             )
         except ValueError as exc:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_HEALTH_TIMEOUT_S must be a number"
+                "XAEROSPACE_ASSISTANT_LLM_HEALTH_TIMEOUT_S must be a number"
             ) from exc
         if not 1.0 <= health_timeout_s <= 30.0:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_HEALTH_TIMEOUT_S must be in [1, 30]"
+                "XAEROSPACE_ASSISTANT_LLM_HEALTH_TIMEOUT_S must be in [1, 30]"
             )
         try:
             max_output_tokens = int(
                 os.environ.get(
-                    "WMS_ASSISTANT_LLM_MAX_OUTPUT_TOKENS",
+                    "XAEROSPACE_ASSISTANT_LLM_MAX_OUTPUT_TOKENS",
                     "1024",
                 ).strip()
             )
         except ValueError as exc:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_MAX_OUTPUT_TOKENS must be an integer"
+                "XAEROSPACE_ASSISTANT_LLM_MAX_OUTPUT_TOKENS must be an integer"
             ) from exc
         if not 128 <= max_output_tokens <= 4_096:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_MAX_OUTPUT_TOKENS must be in [128, 4096]"
+                "XAEROSPACE_ASSISTANT_LLM_MAX_OUTPUT_TOKENS must be in [128, 4096]"
             )
         try:
             circuit_failure_threshold = int(
                 os.environ.get(
-                    "WMS_ASSISTANT_LLM_CIRCUIT_FAILURE_THRESHOLD",
+                    "XAEROSPACE_ASSISTANT_LLM_CIRCUIT_FAILURE_THRESHOLD",
                     "3",
                 ).strip()
             )
             circuit_cooldown_s = float(
                 os.environ.get(
-                    "WMS_ASSISTANT_LLM_CIRCUIT_COOLDOWN_S",
+                    "XAEROSPACE_ASSISTANT_LLM_CIRCUIT_COOLDOWN_S",
                     "60",
                 ).strip()
             )
@@ -350,16 +358,19 @@ class OpenAICompatibleConfig:
             ) from exc
         if not 1 <= circuit_failure_threshold <= 10:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_CIRCUIT_FAILURE_THRESHOLD must be in [1, 10]"
+                "XAEROSPACE_ASSISTANT_LLM_CIRCUIT_FAILURE_THRESHOLD must be in [1, 10]"
             )
         if not 1.0 <= circuit_cooldown_s <= 600.0:
             raise AssistantUnavailableError(
-                "WMS_ASSISTANT_LLM_CIRCUIT_COOLDOWN_S must be in [1, 600]"
+                "XAEROSPACE_ASSISTANT_LLM_CIRCUIT_COOLDOWN_S must be in [1, 600]"
             )
         return cls(
             base_url=base_url.rstrip("/"),
             model=model,
-            api_key=os.environ.get("WMS_ASSISTANT_LLM_API_KEY", "").strip(),
+            api_key=os.environ.get(
+                "XAEROSPACE_ASSISTANT_LLM_API_KEY",
+                "",
+            ).strip(),
             timeout_s=timeout_s,
             compatibility_mode=compatibility_mode,
             max_concurrency=max_concurrency,
@@ -763,7 +774,7 @@ def provider_from_configuration() -> StructuredLLMProvider | None:
         return OpenAICompatibleProvider(config)
     if profile_name is not None:
         raise AssistantUnavailableError(
-            "WMS_ASSISTANT_PROVIDER_PROFILE requires WMS_ASSISTANT_PROVIDER_CONFIG"
+            "XAEROSPACE_PROVIDER_PROFILE requires XAEROSPACE_PROVIDER_CONFIG"
         )
     config = OpenAICompatibleConfig.from_environment()
     return OpenAICompatibleProvider(config) if config is not None else None
@@ -820,7 +831,8 @@ class AssistantService:
         if provider is None:
             raise AssistantUnavailableError(
                 "natural-language drafting is not configured; load a Provider "
-                "configuration or set the legacy LLM environment variables"
+                "configuration or set the XAEROSPACE_ASSISTANT_LLM_* "
+                "environment variables"
             )
         normalized_messages = _normalize_user_messages(user_messages)
         authoritative_request = _render_user_conversation(normalized_messages)

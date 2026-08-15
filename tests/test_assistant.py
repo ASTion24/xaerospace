@@ -153,13 +153,13 @@ def _synthesized(
 def test_openai_provider_requires_complete_configuration_and_strict_json_schema(
     monkeypatch,
 ):
-    monkeypatch.setenv("WMS_ASSISTANT_LLM_BASE_URL", "http://llm.test/v1")
-    monkeypatch.delenv("WMS_ASSISTANT_LLM_MODEL", raising=False)
+    monkeypatch.setenv("XAEROSPACE_ASSISTANT_LLM_BASE_URL", "http://llm.test/v1")
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_MODEL", raising=False)
     with pytest.raises(AssistantUnavailableError, match="configured together"):
         OpenAICompatibleConfig.from_environment()
-    monkeypatch.setenv("WMS_ASSISTANT_LLM_MODEL", "test-model")
+    monkeypatch.setenv("XAEROSPACE_ASSISTANT_LLM_MODEL", "test-model")
     monkeypatch.setenv(
-        "WMS_ASSISTANT_LLM_COMPATIBILITY_MODE",
+        "XAEROSPACE_ASSISTANT_LLM_COMPATIBILITY_MODE",
         "invalid",
     )
     with pytest.raises(AssistantUnavailableError, match="COMPATIBILITY_MODE"):
@@ -273,6 +273,15 @@ def test_openai_provider_requires_complete_configuration_and_strict_json_schema(
         ]
         == "string"
     )
+
+
+def test_removed_wms_provider_environment_is_ignored(monkeypatch):
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_BASE_URL", raising=False)
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_MODEL", raising=False)
+    monkeypatch.setenv("WMS_ASSISTANT_LLM_BASE_URL", "http://removed.test/v1")
+    monkeypatch.setenv("WMS_ASSISTANT_LLM_MODEL", "removed-model")
+
+    assert OpenAICompatibleConfig.from_environment() is None
 
 
 def test_openai_provider_bounds_concurrency_and_supports_cancellation():
@@ -396,8 +405,8 @@ def test_assistant_status_is_explicitly_unavailable_without_provider(
     tmp_path,
     monkeypatch,
 ):
-    monkeypatch.delenv("WMS_ASSISTANT_LLM_BASE_URL", raising=False)
-    monkeypatch.delenv("WMS_ASSISTANT_LLM_MODEL", raising=False)
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_BASE_URL", raising=False)
+    monkeypatch.delenv("XAEROSPACE_ASSISTANT_LLM_MODEL", raising=False)
     monkeypatch.delenv(PROVIDER_CONFIG_ENV, raising=False)
     monkeypatch.delenv(PROVIDER_PROFILE_ENV, raising=False)
     with _client(tmp_path) as client:

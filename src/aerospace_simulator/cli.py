@@ -27,7 +27,7 @@ from .orbit_backend import (
     TudatPyExecutionError,
 )
 from .outputs import write_outputs
-from .paths import XAEROSPACE_HOME_ENV, source_project_root
+from .paths import RUN_DIR_ENV, XAEROSPACE_HOME_ENV, source_project_root
 from .protocol import ProtocolValidationError
 from .provider_config import (
     PROVIDER_CONFIG_ENV,
@@ -180,7 +180,7 @@ def _add_provider_arguments(parser: argparse.ArgumentParser) -> None:
         type=Path,
         help=(
             "Versioned Provider JSON. Defaults to config/providers.local.json "
-            "or ~/.config/wms-aerospace/providers.local.json when present."
+            "or ~/.config/xaerospace/providers.local.json when present."
         ),
     )
     parser.add_argument(
@@ -222,7 +222,7 @@ def _run_web(args: argparse.Namespace) -> int:
     import uvicorn
 
     if args.runs_dir is not None:
-        os.environ["WMS_AEROSPACE_RUN_DIR"] = str(args.runs_dir.resolve())
+        os.environ[RUN_DIR_ENV] = str(args.runs_dir.resolve())
     browser_host = f"[{args.host}]" if args.host == "::1" else args.host
     url = f"http://{browser_host}:{args.port}"
     if not args.no_browser:
@@ -358,7 +358,7 @@ def _bundled_resource(directory: str, filename: str | None = None) -> Path:
         source = source / filename if filename is not None else source
         if source.exists():
             return source
-    installed = Path(sysconfig.get_path("data")) / "share" / "wms-aerospace" / directory
+    installed = Path(sysconfig.get_path("data")) / "share" / "xaerospace" / directory
     installed = installed / filename if filename is not None else installed
     if installed.exists():
         return installed

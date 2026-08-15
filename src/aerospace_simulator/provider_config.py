@@ -18,10 +18,10 @@ from pydantic import (
 )
 
 PROVIDER_CONFIG_SCHEMA_VERSION = 1
-PROVIDER_CONFIG_ENV = "WMS_ASSISTANT_PROVIDER_CONFIG"
-PROVIDER_PROFILE_ENV = "WMS_ASSISTANT_PROVIDER_PROFILE"
+PROVIDER_CONFIG_ENV = "XAEROSPACE_PROVIDER_CONFIG"
+PROVIDER_PROFILE_ENV = "XAEROSPACE_PROVIDER_PROFILE"
 DEFAULT_LOCAL_PROVIDER_CONFIG = Path("config/providers.local.json")
-USER_PROVIDER_CONFIG = Path.home() / ".config/wms-aerospace/providers.local.json"
+USER_PROVIDER_CONFIG = Path.home() / ".config/xaerospace/providers.local.json"
 _MAX_CONFIG_BYTES = 1_000_000
 _ENVIRONMENT_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _PROFILE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")

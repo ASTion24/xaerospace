@@ -2,7 +2,7 @@
 
 ## Scope
 
-`wms.aerospace.launch_to_orbit.v1` models a two-stage point-mass launch
+`xaerospace.launch_to_orbit.v1` models a two-stage point-mass launch
 vehicle from an Earth-fixed launch site through orbital insertion and an
 unpowered verification coast.
 

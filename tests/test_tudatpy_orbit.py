@@ -86,6 +86,6 @@ def test_orbit_outputs_and_request_replay_are_backend_independent(
     normalized = json.loads(artifacts["result"].read_text(encoding="utf-8"))
     assert normalized["backend"]["backend_id"] == "tudatpy"
     assert normalized["request"]["contract_schema"] == (
-        "wms.aerospace.orbit_propagation.v2"
+        "xaerospace.orbit_propagation.v2"
     )
     assert replay_artifacts["orbit_profile"].is_file()

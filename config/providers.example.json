@@ -15,7 +15,7 @@
       "type": "openai_compatible",
       "base_url": "https://api.example.invalid/v1",
       "model": "replace-with-cloud-model-id",
-      "api_key_env": "WMS_PROVIDER_API_KEY",
+      "api_key_env": "XAEROSPACE_PROVIDER_API_KEY",
       "compatibility_mode": "strict",
       "timeout_s": 45,
       "max_concurrency": 1,
@@ -26,7 +26,7 @@
       "base_url": "https://gateway.example.invalid/llm/v1",
       "model": "replace-with-gateway-model-id",
       "header_env": {
-        "X-API-Key": "WMS_GATEWAY_API_KEY"
+        "X-API-Key": "XAEROSPACE_GATEWAY_API_KEY"
       },
       "chat_completions_path": "/chat/completions",
       "models_path": "/models",

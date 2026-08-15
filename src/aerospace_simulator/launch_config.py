@@ -11,7 +11,7 @@ from typing import Any
 from .config import ScenarioValidationError
 from .orbit_config import CentralBodyConfig
 
-LAUNCH_CONTRACT_SCHEMA = "wms.aerospace.launch_to_orbit.v1"
+LAUNCH_CONTRACT_SCHEMA = "xaerospace.launch_to_orbit.v1"
 LAUNCH_TASK_KINDS = ("two_stage_launch_to_orbit",)
 STANDARD_GRAVITY_M_S2 = 9.80665
 

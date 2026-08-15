@@ -6,8 +6,9 @@ from collections.abc import Mapping
 from pathlib import Path
 
 XAEROSPACE_HOME_ENV = "XAEROSPACE_HOME"
-LEGACY_HOME_ENV = "WMS_AEROSPACE_HOME"
-RUN_DIR_ENV = "WMS_AEROSPACE_RUN_DIR"
+RUN_DIR_ENV = "XAEROSPACE_RUN_DIR"
+TUDATPY_PYTHON_ENV = "XAEROSPACE_TUDATPY_PYTHON"
+TUDAT_HOME_ENV = "XAEROSPACE_TUDAT_HOME"
 
 
 def source_project_root(module_file: str | Path | None = None) -> Path | None:
@@ -27,10 +28,9 @@ def user_data_root(
     platform: str | None = None,
 ) -> Path:
     environment = os.environ if environ is None else environ
-    for variable in (XAEROSPACE_HOME_ENV, LEGACY_HOME_ENV):
-        configured = environment.get(variable, "").strip()
-        if configured:
-            return Path(configured).expanduser().resolve()
+    configured = environment.get(XAEROSPACE_HOME_ENV, "").strip()
+    if configured:
+        return Path(configured).expanduser().resolve()
 
     user_home = (home or Path.home()).expanduser()
     current_platform = platform or sys.platform
@@ -71,20 +71,17 @@ def default_tudat_runtime(
     module_file: str | Path | None = None,
 ) -> tuple[Path, Path]:
     environment = os.environ if environ is None else environ
-    python_override = environment.get("WMS_TUDATPY_PYTHON", "").strip()
-    home_override = environment.get("WMS_TUDAT_HOME", "").strip()
-    data_root_override = any(
-        environment.get(variable, "").strip()
-        for variable in (XAEROSPACE_HOME_ENV, LEGACY_HOME_ENV)
-    )
+    python_override = environment.get(TUDATPY_PYTHON_ENV, "").strip()
+    home_override = environment.get(TUDAT_HOME_ENV, "").strip()
+    data_root_override = bool(environment.get(XAEROSPACE_HOME_ENV, "").strip())
 
     source_root = source_project_root(module_file)
-    legacy_python = (
+    checkout_python = (
         source_root / ".tudat-env" / "bin" / "python"
         if source_root is not None
         else None
     )
-    legacy_home = source_root / ".local-home" if source_root is not None else None
+    checkout_home = source_root / ".local-home" if source_root is not None else None
     data_root = user_data_root(
         environ=environment,
         home=home,
@@ -95,22 +92,22 @@ def default_tudat_runtime(
     python_executable = (
         Path(python_override).expanduser().resolve()
         if python_override
-        else legacy_python
+        else checkout_python
         if (
             not data_root_override
-            and legacy_python is not None
-            and legacy_python.is_file()
+            and checkout_python is not None
+            and checkout_python.is_file()
         )
         else runtime_root / "env" / "bin" / "python"
     )
     runtime_home = (
         Path(home_override).expanduser().resolve()
         if home_override
-        else legacy_home
+        else checkout_home
         if (
             not data_root_override
-            and legacy_home is not None
-            and (legacy_home / ".tudat" / "resource").is_dir()
+            and checkout_home is not None
+            and (checkout_home / ".tudat" / "resource").is_dir()
         )
         else runtime_root / "home"
     )

@@ -20,7 +20,7 @@ Every task enters the backend registry as a `SimulationRequest`:
   "label": "Single-stage sounding rocket",
   "description": "Demonstration flight",
   "task_kind": "single_stage_rigid_body_6dof",
-  "contract_schema": "wms.aerospace.scenario.v1",
+  "contract_schema": "xaerospace.scenario.v1",
   "backend_preference": "auto",
   "contract": {}
 }
@@ -54,7 +54,7 @@ Each adapter declares:
     "single_stage_rigid_body_6dof_recovery"
   ],
   "supported_contract_schemas": [
-    "wms.aerospace.scenario.v1"
+    "xaerospace.scenario.v1"
   ]
 }
 ```
@@ -71,7 +71,7 @@ TudatPy declares a separate capability surface:
     "earth_orbit_j2"
   ],
   "supported_contract_schemas": [
-    "wms.aerospace.orbit_propagation.v2"
+    "xaerospace.orbit_propagation.v2"
   ],
   "supported_family_ids": [
     "orbit_propagation"
@@ -97,7 +97,7 @@ JSBSim declares a third, non-overlapping capability surface:
     "fixed_wing_trimmed_6dof"
   ],
   "supported_contract_schemas": [
-    "wms.aerospace.aircraft_flight.v1"
+    "xaerospace.aircraft_flight.v1"
   ]
 }
 ```
@@ -114,7 +114,7 @@ Basilisk declares a fourth, non-overlapping capability surface:
     "spacecraft_rate_damping_gnc"
   ],
   "supported_contract_schemas": [
-    "wms.aerospace.spacecraft_attitude.v1"
+    "xaerospace.spacecraft_attitude.v1"
   ]
 }
 ```

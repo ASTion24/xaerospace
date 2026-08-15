@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "wms-assistant-single-task-v1",
+  "name": "xaerospace-assistant-single-task-v1",
   "cases": [
     {
       "case_id": "rocket_3dof_ballistic_zh",

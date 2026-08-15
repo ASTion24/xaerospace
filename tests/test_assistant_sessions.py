@@ -519,7 +519,7 @@ def test_confirmed_assistant_launch_reaches_verified_orbit_with_tudatpy(
         "model_manifest",
         "result",
     }
-    assert provenance_document["schema"] == ("wms.aerospace.assistant_provenance.v1")
+    assert provenance_document["schema"] == ("xaerospace.assistant_provenance.v1")
     assert provenance_document["workflow_id"] == workflow["workflow_id"]
     assert provenance_document["task_id"] == task["task_id"]
     assert provenance_document["provenance"] == workflow["provenance"]

@@ -19,6 +19,7 @@ from aerospace_simulator.registry import (
 from aerospace_simulator.request_io import (
     AEROSPACE_CONTRACT_SCHEMA,
     load_request,
+    request_from_document,
     request_from_scenario,
 )
 from aerospace_simulator.simulation import (
@@ -72,6 +73,14 @@ def test_request_envelope_round_trips_through_the_public_loader(tmp_path):
     loaded = load_request(path)
 
     assert loaded.document() == request.document()
+
+
+def test_removed_wms_contract_schema_is_rejected():
+    document = request_from_scenario(load_scenario(SCENARIO_PATH)).document()
+    document["contract_schema"] = "wms.aerospace.scenario.v1"
+
+    with pytest.raises(ProtocolValidationError, match="unsupported contract_schema"):
+        request_from_document(document)
 
 
 def test_optional_recovery_fields_round_trip_without_null_placeholders(tmp_path):
