@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import re
+import shutil
 import threading
 from collections.abc import Callable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
@@ -21,12 +22,18 @@ from .outputs import write_outputs
 from .protocol import BackendCapabilities, SimulationRequest, UnifiedSimulationResult
 from .request_io import request_from_document
 from .simulation import create_default_registry, run_request
+from .workspace_database import WorkspaceDatabase, WorkspaceDatabaseError
 
 MAX_WORKFLOW_TASKS = 12
+MAX_WORKFLOW_HISTORY_PAGE_SIZE = 100
 WORKFLOW_EXPORT_SCHEMA = "wms.aerospace.workflow.v1"
+WORKFLOW_RECORD_SCHEMA = "wms.aerospace.workflow_record.v1"
 ASSISTANT_PROVENANCE_SCHEMA = "wms.aerospace.assistant_provenance.v1"
 _TASK_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
-_TERMINAL_WORKFLOW_STATES = {"completed", "failed"}
+_TERMINAL_WORKFLOW_STATES = {"completed", "failed", "interrupted"}
+_TERMINAL_TASK_STATES = {"completed", "failed", "skipped", "interrupted"}
+_WORKFLOW_STATES = {"queued", "running", *_TERMINAL_WORKFLOW_STATES}
+_TASK_STATES = {"queued", "running", *_TERMINAL_TASK_STATES}
 
 
 class WorkflowValidationError(ValueError):
@@ -39,6 +46,10 @@ class WorkflowNotFoundError(KeyError):
 
 class WorkflowArtifactNotFoundError(KeyError):
     """Raised when a task artifact is not present in a workflow."""
+
+
+class WorkflowConflictError(RuntimeError):
+    """Raised when an active workflow cannot be mutated safely."""
 
 
 @dataclass
@@ -55,6 +66,8 @@ class WorkflowTaskRecord:
     completed_at: str | None = None
     summary: dict[str, object] | None = None
     artifacts: dict[str, Path] = field(default_factory=dict)
+    artifact_hashes: dict[str, str] = field(default_factory=dict)
+    artifact_integrity: dict[str, str] = field(default_factory=dict)
     error: dict[str, str] | None = None
 
 
@@ -79,9 +92,13 @@ class WorkflowStore:
         output_writer: Callable[
             [UnifiedSimulationResult, str | Path], dict[str, Path]
         ] = write_outputs,
+        database_path: str | Path | None = None,
     ) -> None:
-        self._runs_root = Path(runs_root)
+        self._runs_root = Path(runs_root).resolve()
         self._runs_root.mkdir(parents=True, exist_ok=True)
+        self._database = WorkspaceDatabase(
+            database_path or self._runs_root.parent / "workspace.sqlite3"
+        )
         self._runner = runner
         self._output_writer = output_writer
         self._executor = ThreadPoolExecutor(
@@ -90,6 +107,7 @@ class WorkflowStore:
         )
         self._lock = threading.RLock()
         self._workflows: dict[str, WorkflowRecord] = {}
+        self._restore_workflows()
 
     @property
     def runs_root(self) -> Path:
@@ -168,9 +186,52 @@ class WorkflowStore:
         )
         with self._lock:
             self._workflows[workflow_id] = record
+            try:
+                self._persist_locked(record)
+            except Exception:
+                del self._workflows[workflow_id]
+                raise
         self._executor.submit(self._execute, workflow_id)
         result = self.get(workflow_id)
         return result
+
+    def list(
+        self,
+        *,
+        limit: int = 50,
+        offset: int = 0,
+        status: str | None = None,
+    ) -> dict[str, object]:
+        if limit < 1 or limit > MAX_WORKFLOW_HISTORY_PAGE_SIZE:
+            raise WorkflowValidationError(
+                "workflow history limit must be between 1 and "
+                f"{MAX_WORKFLOW_HISTORY_PAGE_SIZE}"
+            )
+        if offset < 0:
+            raise WorkflowValidationError(
+                "workflow history offset must be non-negative"
+            )
+        if status is not None and status not in _WORKFLOW_STATES:
+            raise WorkflowValidationError(
+                f"unsupported workflow history status: {status}"
+            )
+        with self._lock:
+            records = sorted(
+                self._workflows.values(),
+                key=lambda item: (item.created_at, item.workflow_id),
+                reverse=True,
+            )
+            if status is not None:
+                records = [item for item in records if item.status == status]
+            total = len(records)
+            page = records[offset : offset + limit]
+            items = [self._history_snapshot(item) for item in page]
+        return {
+            "workflows": items,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+        }
 
     def get(self, workflow_id: str) -> dict[str, object]:
         with self._lock:
@@ -225,16 +286,43 @@ class WorkflowStore:
             raise WorkflowArtifactNotFoundError(
                 f"workflow artifact file is missing: {artifact_name}"
             )
+        expected_hash = task.artifact_hashes.get(artifact_name)
+        if expected_hash is None or _sha256(path) != expected_hash:
+            raise WorkflowArtifactNotFoundError(
+                f"workflow artifact failed integrity validation: {artifact_name}"
+            )
         return path
+
+    def delete(self, workflow_id: str) -> None:
+        quarantine: Path | None = None
+        workflow_directory = self._runs_root / workflow_id
+        with self._lock:
+            record = self._record(workflow_id)
+            if not is_terminal_workflow_status(record.status):
+                raise WorkflowConflictError("active workflows cannot be deleted")
+            if workflow_directory.exists():
+                quarantine = self._runs_root / (f".delete-{workflow_id}-{uuid4().hex}")
+                workflow_directory.replace(quarantine)
+            try:
+                self._database.delete_workflow(workflow_id)
+            except Exception:
+                if quarantine is not None and quarantine.exists():
+                    quarantine.replace(workflow_directory)
+                raise
+            del self._workflows[workflow_id]
+        if quarantine is not None:
+            shutil.rmtree(quarantine)
 
     def close(self) -> None:
         self._executor.shutdown(wait=True, cancel_futures=False)
+        self._database.close()
 
     def _execute(self, workflow_id: str) -> None:
         with self._lock:
             record = self._record(workflow_id)
             record.status = "running"
             record.started_at = _timestamp()
+            self._persist_locked(record)
 
         failed = False
         completed_results: dict[str, UnifiedSimulationResult] = {}
@@ -244,6 +332,7 @@ class WorkflowStore:
             with self._lock:
                 task.status = "running"
                 task.started_at = _timestamp()
+                self._persist_locked(record)
             try:
                 if task.handover is not None:
                     source_result = completed_results.get(task.handover.source_task_id)
@@ -290,6 +379,7 @@ class WorkflowStore:
                             "error": task.error["message"],
                         }
                     failed = True
+                    self._persist_locked(record)
             else:
                 completed_results[task.task_id] = result
                 with self._lock:
@@ -297,6 +387,11 @@ class WorkflowStore:
                     task.completed_at = _timestamp()
                     task.summary = result.document(include_samples=False)
                     task.artifacts = artifacts
+                    task.artifact_hashes = {
+                        name: _sha256(path) for name, path in artifacts.items()
+                    }
+                    task.artifact_integrity = {name: "ok" for name in artifacts}
+                    self._persist_locked(record)
 
         with self._lock:
             if failed:
@@ -311,6 +406,7 @@ class WorkflowStore:
             else:
                 record.status = "completed"
             record.completed_at = _timestamp()
+            self._persist_locked(record)
 
     def _record(self, workflow_id: str) -> WorkflowRecord:
         try:
@@ -372,6 +468,11 @@ class WorkflowStore:
                         "name": name,
                         "filename": path.name,
                         "media_type": _media_type(path),
+                        "sha256": task.artifact_hashes.get(name),
+                        "integrity": task.artifact_integrity.get(
+                            name,
+                            "unknown",
+                        ),
                         "url": (
                             f"/api/workflows/{record.workflow_id}/tasks/"
                             f"{task.task_id}/artifacts/{name}"
@@ -385,7 +486,7 @@ class WorkflowStore:
         ]
         succeeded_count = sum(task.status == "completed" for task in record.tasks)
         finished_count = sum(
-            task.status in {"completed", "failed", "skipped"} for task in record.tasks
+            task.status in _TERMINAL_TASK_STATES for task in record.tasks
         )
         result = {
             "workflow_id": record.workflow_id,
@@ -404,6 +505,197 @@ class WorkflowStore:
             "tasks": task_snapshots,
         }
         return result
+
+    def _history_snapshot(self, record: WorkflowRecord) -> dict[str, object]:
+        snapshot = self._snapshot(record)
+        return {
+            key: snapshot[key]
+            for key in (
+                "workflow_id",
+                "name",
+                "status",
+                "provenance",
+                "created_at",
+                "started_at",
+                "completed_at",
+                "progress",
+            )
+        } | {
+            "task_count": len(record.tasks),
+            "backends": sorted({task.backend.backend_id for task in record.tasks}),
+        }
+
+    def _persist_locked(self, record: WorkflowRecord) -> None:
+        self._database.upsert_workflow(self._record_document(record))
+
+    def _record_document(self, record: WorkflowRecord) -> dict[str, object]:
+        return {
+            "record_schema": WORKFLOW_RECORD_SCHEMA,
+            "workflow_id": record.workflow_id,
+            "name": record.name,
+            "status": record.status,
+            "created_at": record.created_at,
+            "started_at": record.started_at,
+            "completed_at": record.completed_at,
+            "provenance": copy.deepcopy(record.provenance),
+            "tasks": [
+                {
+                    "task_id": task.task_id,
+                    "order": task.order,
+                    "submitted_document": copy.deepcopy(task.submitted_document),
+                    "request": task.request.document(),
+                    "backend": task.backend.document(),
+                    "handover": (
+                        task.handover.document() if task.handover is not None else None
+                    ),
+                    "handover_report": copy.deepcopy(task.handover_report),
+                    "status": task.status,
+                    "started_at": task.started_at,
+                    "completed_at": task.completed_at,
+                    "summary": copy.deepcopy(task.summary),
+                    "artifacts": {
+                        name: {
+                            "path": _relative_artifact_path(
+                                path,
+                                self._runs_root,
+                            ),
+                            "sha256": task.artifact_hashes.get(name),
+                        }
+                        for name, path in task.artifacts.items()
+                    },
+                    "error": copy.deepcopy(task.error),
+                }
+                for task in record.tasks
+            ],
+        }
+
+    def _restore_workflows(self) -> None:
+        for document in self._database.load_workflows():
+            record = self._record_from_document(document)
+            if record.workflow_id in self._workflows:
+                raise WorkspaceDatabaseError(
+                    f"duplicate workflow id in workspace: {record.workflow_id}"
+                )
+            recovered = self._recover_interrupted(record)
+            self._workflows[record.workflow_id] = record
+            if recovered:
+                self._persist_locked(record)
+
+    def _record_from_document(
+        self,
+        document: Mapping[str, object],
+    ) -> WorkflowRecord:
+        if document.get("record_schema") != WORKFLOW_RECORD_SCHEMA:
+            raise WorkspaceDatabaseError(
+                f"unsupported workflow record schema: {document.get('record_schema')!r}"
+            )
+        tasks_raw = document.get("tasks")
+        if not isinstance(tasks_raw, list) or not tasks_raw:
+            raise WorkspaceDatabaseError(
+                "persisted workflow must contain at least one task"
+            )
+        tasks = [self._task_from_document(item) for item in tasks_raw]
+        workflow_status = _record_string(document, "status")
+        if workflow_status not in _WORKFLOW_STATES:
+            raise WorkspaceDatabaseError(
+                f"unsupported persisted workflow status: {workflow_status}"
+            )
+        return WorkflowRecord(
+            workflow_id=_record_string(document, "workflow_id"),
+            name=_record_string(document, "name"),
+            status=workflow_status,
+            created_at=_record_string(document, "created_at"),
+            tasks=tasks,
+            provenance=_optional_mapping(document.get("provenance")),
+            started_at=_optional_string(document.get("started_at")),
+            completed_at=_optional_string(document.get("completed_at")),
+        )
+
+    def _task_from_document(
+        self,
+        value: object,
+    ) -> WorkflowTaskRecord:
+        if not isinstance(value, Mapping):
+            raise WorkspaceDatabaseError("persisted workflow task must be an object")
+        submitted = value.get("submitted_document")
+        request_document = value.get("request")
+        backend_document = value.get("backend")
+        if not isinstance(submitted, Mapping):
+            raise WorkspaceDatabaseError(
+                "persisted submitted task document must be an object"
+            )
+        if not isinstance(request_document, Mapping):
+            raise WorkspaceDatabaseError("persisted task request must be an object")
+        request = request_from_document(request_document)
+        backend = _backend_from_document(backend_document)
+        handover_raw = value.get("handover")
+        handover = (
+            None if handover_raw is None else HandoverSpec.from_mapping(handover_raw)
+        )
+        artifacts_raw = value.get("artifacts", {})
+        if not isinstance(artifacts_raw, Mapping):
+            raise WorkspaceDatabaseError("persisted task artifacts must be an object")
+        artifacts: dict[str, Path] = {}
+        artifact_hashes: dict[str, str] = {}
+        artifact_integrity: dict[str, str] = {}
+        for name, item in artifacts_raw.items():
+            if not isinstance(name, str) or not isinstance(item, Mapping):
+                raise WorkspaceDatabaseError(
+                    "persisted artifact entries must be objects"
+                )
+            relative = _record_string(item, "path")
+            path = _restored_artifact_path(relative, self._runs_root)
+            expected_hash = _record_string(item, "sha256")
+            artifacts[name] = path
+            artifact_hashes[name] = expected_hash
+            artifact_integrity[name] = _artifact_integrity(
+                path,
+                expected_hash,
+            )
+        task_status = _record_string(value, "status")
+        if task_status not in _TASK_STATES:
+            raise WorkspaceDatabaseError(
+                f"unsupported persisted workflow task status: {task_status}"
+            )
+        return WorkflowTaskRecord(
+            task_id=_record_string(value, "task_id"),
+            order=_record_integer(value, "order"),
+            submitted_document=copy.deepcopy(dict(submitted)),
+            request=request,
+            backend=backend,
+            handover=handover,
+            handover_report=_optional_mapping(value.get("handover_report")),
+            status=task_status,
+            started_at=_optional_string(value.get("started_at")),
+            completed_at=_optional_string(value.get("completed_at")),
+            summary=_optional_mapping(value.get("summary")),
+            artifacts=artifacts,
+            artifact_hashes=artifact_hashes,
+            artifact_integrity=artifact_integrity,
+            error=_optional_string_mapping(value.get("error")),
+        )
+
+    def _recover_interrupted(self, record: WorkflowRecord) -> bool:
+        if is_terminal_workflow_status(record.status):
+            return False
+        now = _timestamp()
+        for task in record.tasks:
+            if task.status == "running":
+                task.status = "interrupted"
+                task.completed_at = now
+                task.error = {
+                    "type": "WorkflowInterrupted",
+                    "message": ("execution was interrupted by a previous service stop"),
+                }
+            elif task.status == "queued":
+                task.status = "skipped"
+                task.error = {
+                    "type": "WorkflowInterrupted",
+                    "message": ("not executed because the previous service stopped"),
+                }
+        record.status = "interrupted"
+        record.completed_at = now
+        return True
 
 
 def is_terminal_workflow_status(status: str) -> bool:
@@ -473,3 +765,132 @@ def _media_type(path: Path) -> str:
     }
     result = media_types.get(path.suffix.lower(), "application/octet-stream")
     return result
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _relative_artifact_path(path: Path, runs_root: Path) -> str:
+    try:
+        relative = path.resolve().relative_to(runs_root)
+    except ValueError as exc:
+        raise WorkspaceDatabaseError(
+            f"workflow artifact is outside the runs directory: {path}"
+        ) from exc
+    return relative.as_posix()
+
+
+def _restored_artifact_path(relative: str, runs_root: Path) -> Path:
+    path = (runs_root / relative).resolve()
+    try:
+        path.relative_to(runs_root)
+    except ValueError as exc:
+        raise WorkspaceDatabaseError(
+            f"persisted artifact escapes the runs directory: {relative}"
+        ) from exc
+    return path
+
+
+def _artifact_integrity(path: Path, expected_hash: str) -> str:
+    if not path.is_file():
+        return "missing"
+    if _sha256(path) != expected_hash:
+        return "corrupt"
+    return "ok"
+
+
+def _backend_from_document(value: object) -> BackendCapabilities:
+    if not isinstance(value, Mapping):
+        raise WorkspaceDatabaseError("persisted backend capabilities must be an object")
+    return BackendCapabilities(
+        backend_id=_record_string(value, "backend_id"),
+        backend_name=_record_string(value, "backend_name"),
+        backend_version=_record_string(value, "backend_version"),
+        supported_task_kinds=_string_tuple(value, "supported_task_kinds"),
+        supported_contract_schemas=_string_tuple(
+            value,
+            "supported_contract_schemas",
+        ),
+        supported_family_ids=_string_tuple(
+            value,
+            "supported_family_ids",
+            required=False,
+        ),
+        supported_component_ids=_string_tuple(
+            value,
+            "supported_component_ids",
+            required=False,
+        ),
+    )
+
+
+def _string_tuple(
+    value: Mapping[str, object],
+    key: str,
+    *,
+    required: bool = True,
+) -> tuple[str, ...]:
+    items = value.get(key)
+    if items is None and not required:
+        return ()
+    if not isinstance(items, list) or any(
+        not isinstance(item, str) or not item for item in items
+    ):
+        raise WorkspaceDatabaseError(
+            f"persisted workflow record {key} must be a string array"
+        )
+    return tuple(items)
+
+
+def _record_string(value: Mapping[str, object], key: str) -> str:
+    item = value.get(key)
+    if not isinstance(item, str) or not item:
+        raise WorkspaceDatabaseError(
+            f"persisted workflow record {key} must be a string"
+        )
+    return item
+
+
+def _record_integer(value: Mapping[str, object], key: str) -> int:
+    item = value.get(key)
+    if not isinstance(item, int) or isinstance(item, bool):
+        raise WorkspaceDatabaseError(
+            f"persisted workflow record {key} must be an integer"
+        )
+    return item
+
+
+def _optional_string(value: object) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value:
+        raise WorkspaceDatabaseError(
+            "persisted workflow optional timestamp must be a string"
+        )
+    return value
+
+
+def _optional_mapping(value: object) -> dict[str, object] | None:
+    if value is None:
+        return None
+    if not isinstance(value, Mapping):
+        raise WorkspaceDatabaseError(
+            "persisted workflow optional value must be an object"
+        )
+    return copy.deepcopy(dict(value))
+
+
+def _optional_string_mapping(value: object) -> dict[str, str] | None:
+    if value is None:
+        return None
+    if not isinstance(value, Mapping) or any(
+        not isinstance(key, str) or not isinstance(item, str)
+        for key, item in value.items()
+    ):
+        raise WorkspaceDatabaseError("persisted workflow error must be a string object")
+    return dict(value)

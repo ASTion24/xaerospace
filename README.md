@@ -6,8 +6,8 @@
 
 RocketPy · TudatPy · JSBSim · Basilisk
 
-[中文使用手册](docs/v0.1.2_product_demo_zh.md) ·
-[PDF 手册](docs/Xaerospace_v0.1.2_使用手册.pdf) ·
+[中文使用手册](docs/v0.2.0_product_demo_zh.md) ·
+[PDF 手册](docs/Xaerospace_v0.2.0_使用手册.pdf) ·
 [统一协议](docs/unified_io_protocol.md) ·
 [Provider 配置](docs/provider_configuration.md)
 
@@ -84,6 +84,8 @@ uv run xaerospace web --no-browser
 默认情况下，运行产物和 TudatPy 隔离环境位于
 `~/Library/Application Support/Xaerospace/`。可通过 `XAEROSPACE_HOME`
 修改整个用户数据根目录，或用 `xaerospace web --runs-dir` 仅修改运行产物目录。
+工作流索引和状态保存在该目录的 `workspace.sqlite3`，大型时序结果仍位于
+`runs/`。
 
 ### 3. 执行第一个任务
 
@@ -99,6 +101,18 @@ uv run xaerospace web --no-browser
 xaerospace simulate scenarios/single_stage_demo.json \
   --output outputs/single_stage_demo
 ```
+
+## 持久任务工作区
+
+已确认执行的工作流会持久保存。服务或浏览器重启后，Studio 可以从“历史”中
+重新打开任务队列、结果和导出合同；浏览器刷新会恢复最近查看的工作流。
+
+运行中的任务不会被猜测为成功，也不会自动重试。服务异常停止后，未完成工作流
+会明确变为 `interrupted`，由用户检查上下文后决定是否显式重放。结果产物保存
+SHA-256，下载前会重新校验；历史中的终态工作流可以由用户确认后删除。
+
+持久层沿用现有 `WorkflowStore` 和文件产物目录，只增加一个本地 SQLite 索引。
+DraftSession 仍是短期编辑上下文，不持久化对话全文。
 
 ## 一句话到入轨
 
@@ -240,6 +254,7 @@ xaerospace simulate outputs/single_stage_demo/request.json \
   -> TaskFamilyRegistry
   -> BackendRegistry
   -> RocketPy | TudatPy | JSBSim | Basilisk
+  -> WorkflowStore + SQLite durable index
   -> UnifiedSimulationResult
   -> 状态 / 事件 / 指标 / 方程 / 图表 / 审计产物
 ```
@@ -288,13 +303,15 @@ Hiragino Sans GB、Avenir Next 和 Menlo。
 - 用户必须显式确认当前 revision。
 - Provider 失败不会回退到另一个未选择的 Provider。
 - 后端失败不会回退到另一套物理模型。
+- 中断任务不会自动恢复或自动重试。
+- 运行产物在下载前执行 SHA-256 完整性校验。
 - 本地 Provider 配置不会进入 Git 或 wheel。
 - 本项目不是飞行认证、任务安全分析或真实制导控制软件。
 
 ## 文档
 
-- [完整中文使用手册](docs/v0.1.2_product_demo_zh.md)
-- [PDF 使用手册](docs/Xaerospace_v0.1.2_使用手册.pdf)
+- [完整中文使用手册](docs/v0.2.0_product_demo_zh.md)
+- [PDF 使用手册](docs/Xaerospace_v0.2.0_使用手册.pdf)
 - [Provider 配置](docs/provider_configuration.md)
 - [统一输入输出协议](docs/unified_io_protocol.md)
 - [两级发射入轨](docs/two_stage_launch_to_orbit.md)

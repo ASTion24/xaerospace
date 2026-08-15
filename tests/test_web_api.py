@@ -81,6 +81,9 @@ def test_web_application_serves_catalog_capabilities_and_static_assets(client):
     assert 'id="handoverSection"' in index.text
     assert 'id="verificationSection"' in index.text
     assert 'id="replayWorkflow"' in index.text
+    assert 'id="toggleWorkflowHistory"' in index.text
+    assert 'id="workflowHistoryPanel"' in index.text
+    assert 'id="workflowHistoryList"' in index.text
     assert 'id="replayWorkflowFile"' in index.text
     assert 'id="exportWorkflow"' in index.text
     assert 'src="/assets/parameter-guide.js"' not in index.text
@@ -108,6 +111,11 @@ def test_web_application_serves_catalog_capabilities_and_static_assets(client):
     assert "/export`" in javascript.text
     assert "replayWorkflowDocument" in javascript.text
     assert "exportWorkflowDocument" in javascript.text
+    assert 'api("/api/workflows?limit=50")' in javascript.text
+    assert "restoreActiveWorkflow" in javascript.text
+    assert "applyRestoredWorkflow" in javascript.text
+    assert "workflowHistoryDeleted" in translations.text
+    assert "Workflow History" in translations.text
     assert "setSourceView" in javascript.text
     assert 'setWorkbenchView("results")' in javascript.text
     assert (
@@ -389,6 +397,23 @@ def test_web_workflow_executes_real_backend_and_serves_artifacts(client):
     assert image.status_code == 200
     assert image.headers["content-type"] == "image/png"
     assert image.content.startswith(b"\x89PNG")
+
+    history = client.get("/api/workflows?limit=10&status=completed")
+    assert history.status_code == 200
+    assert history.json()["total"] == 1
+    assert history.json()["workflows"][0]["workflow_id"] == workflow["workflow_id"]
+    assert history.json()["workflows"][0]["backends"] == ["rocketpy"]
+
+    deleted = client.delete(f"/api/workflows/{workflow['workflow_id']}")
+    assert deleted.status_code == 204
+    assert client.get(f"/api/workflows/{workflow['workflow_id']}").status_code == 404
+    assert client.get("/api/workflows").json()["total"] == 0
+
+
+def test_workflow_history_rejects_invalid_pagination_and_status(client):
+    assert client.get("/api/workflows?limit=0").status_code == 422
+    assert client.get("/api/workflows?offset=-1").status_code == 422
+    assert client.get("/api/workflows?status=unknown").status_code == 422
 
 
 def test_workflow_export_and_explicit_replay_preserve_contract(client):
