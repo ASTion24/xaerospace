@@ -89,8 +89,6 @@ jobs:
         os: [macos-14, ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
-    env:
-      XAEROSPACE_HOME: ${{ github.workspace }}/.xaerospace-ci-home
     steps:
       - uses: actions/checkout@v4
 
@@ -107,11 +105,15 @@ jobs:
       - name: Cache pinned TudatPy runtime
         uses: actions/cache@v4
         with:
-          path: ${{ env.XAEROSPACE_HOME }}/runtime/tudat
+          path: ${{ runner.temp }}/xaerospace-home/runtime/tudat
           key: tudatpy-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('config/tudatpy-*-lock.txt', 'src/aerospace_simulator/tudat_setup.py') }}
 
       - name: Install pinned TudatPy runtime
+        env:
+          XAEROSPACE_HOME: ${{ runner.temp }}/xaerospace-home
         run: uv run xaerospace setup-tudatpy
 
       - name: Run complete release gate
+        env:
+          XAEROSPACE_HOME: ${{ runner.temp }}/xaerospace-home
         run: uv run python scripts/release_gate.py
