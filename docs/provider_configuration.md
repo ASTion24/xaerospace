@@ -39,6 +39,8 @@ cp config/providers.example.json config/providers.local.json
 chmod 600 config/providers.local.json
 ```
 
+Windows PowerShell 不需要执行 `chmod`。
+
 当前工作区已经创建一个 `previous_glm` 初始 profile，保存此前完成真实验收时
 使用的地址和模型。该文件只存在于本地并且权限为 `0600`。
 
@@ -161,7 +163,10 @@ Authorization: Bearer <value>
 2. `XAEROSPACE_PROVIDER_CONFIG`；
 3. 当前目录的 `config/providers.local.json`；
 4. 源码项目目录的 `config/providers.local.json`；
-5. `~/.config/xaerospace/providers.local.json`。
+5. 平台用户配置目录中的 `providers.local.json`：
+   - macOS：`~/Library/Application Support/Xaerospace/`；
+   - Linux：`$XDG_CONFIG_HOME/xaerospace/` 或 `~/.config/xaerospace/`；
+   - Windows：`%LOCALAPPDATA%\Xaerospace\`。
 
 profile 选择顺序：
 

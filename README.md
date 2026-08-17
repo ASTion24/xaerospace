@@ -51,16 +51,29 @@ uv sync --extra test --python 3.12
 
 ```bash
 python3.12 -m venv .venv
+# macOS / Linux
 source .venv/bin/activate
+# Windows PowerShell
+# .venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[test,release]"
 ```
 
-TudatPy 使用独立 Conda 环境。在 macOS arm64 上运行：
+TudatPy 使用由 Xaerospace 管理的独立、锁定 Conda 环境。在受支持的平台运行：
 
 ```bash
-uv run xaerospace setup-tudatpy
+xaerospace setup-tudatpy
 ```
+
+当前完整四后端支持矩阵：
+
+| 平台 | 架构 | Python | CI 门禁 |
+|---|---|---|---|
+| macOS | arm64 | 3.12 | 完整四后端 |
+| Linux | x86_64 | 3.10–3.12 | 安装与 wheel；3.12 完整四后端 |
+| Windows | x86_64 | 3.10–3.12 | 安装与 wheel；3.12 完整四后端 |
+
+其他架构会明确拒绝自动安装 TudatPy，不会下载不匹配的二进制环境。
 
 ### 2. 启动工作台
 
@@ -80,9 +93,16 @@ http://127.0.0.1:8000
 uv run xaerospace web --no-browser
 ```
 
-默认情况下，运行产物和 TudatPy 隔离环境位于
-`~/Library/Application Support/Xaerospace/`。可通过 `XAEROSPACE_HOME`
-修改整个用户数据根目录，或用 `xaerospace web --runs-dir` 仅修改运行产物目录。
+默认情况下，运行产物和 TudatPy 隔离环境位于平台原生用户数据目录：
+
+| 平台 | 默认目录 |
+|---|---|
+| macOS | `~/Library/Application Support/Xaerospace/` |
+| Linux | `$XDG_DATA_HOME/xaerospace/` 或 `~/.local/share/xaerospace/` |
+| Windows | `%LOCALAPPDATA%\Xaerospace\` |
+
+可通过 `XAEROSPACE_HOME` 修改整个用户数据根目录，或用
+`xaerospace web --runs-dir` 仅修改运行产物目录。
 工作流索引和状态保存在该目录的 `workspace.sqlite3`，大型时序结果仍位于
 `runs/`。
 
@@ -148,6 +168,9 @@ LLM 不直接运行仿真，也不能修改锁定字段。只有用户点击“�
 cp config/providers.example.json config/providers.local.json
 chmod 600 config/providers.local.json
 ```
+
+Windows PowerShell 不需要执行 `chmod`；应使用当前用户可读的本地配置文件，
+并继续通过环境变量提供密钥。
 
 在本地文件中填写 API 地址和模型，将密钥放入环境变量：
 
@@ -311,6 +334,7 @@ Hiragino Sans GB、Avenir Next 和 Menlo。
 
 - [完整中文使用手册](docs/v0.2.2_product_demo_zh.md)
 - [Provider 配置](docs/provider_configuration.md)
+- [平台支持](docs/platform_support.md)
 - [统一输入输出协议](docs/unified_io_protocol.md)
 - [两级发射入轨](docs/two_stage_launch_to_orbit.md)
 - [跨后端状态交接](docs/cross_backend_handover.md)

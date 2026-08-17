@@ -3,8 +3,10 @@ from pathlib import Path
 from aerospace_simulator.paths import (
     default_runs_root,
     default_tudat_runtime,
+    environment_python,
     runtime_working_directory,
     source_project_root,
+    user_config_root,
     user_data_root,
 )
 
@@ -63,6 +65,66 @@ def test_user_data_root_uses_macos_application_support_and_explicit_override(
     )
 
 
+def test_user_directories_follow_linux_xdg_conventions(tmp_path):
+    environment = {
+        "XDG_DATA_HOME": str(tmp_path / "data"),
+        "XDG_CONFIG_HOME": str(tmp_path / "config"),
+    }
+
+    assert (
+        user_data_root(
+            environ=environment,
+            home=tmp_path / "home",
+            platform="linux",
+        )
+        == (tmp_path / "data" / "xaerospace").resolve()
+    )
+    assert (
+        user_config_root(
+            environ=environment,
+            home=tmp_path / "home",
+            platform="linux",
+        )
+        == (tmp_path / "config" / "xaerospace").resolve()
+    )
+
+
+def test_user_directories_follow_windows_local_app_data(tmp_path):
+    local_app_data = tmp_path / "LocalAppData"
+    environment = {"LOCALAPPDATA": str(local_app_data)}
+
+    assert (
+        user_data_root(
+            environ=environment,
+            home=tmp_path / "home",
+            platform="win32",
+        )
+        == (local_app_data / "Xaerospace").resolve()
+    )
+    assert (
+        user_config_root(
+            environ=environment,
+            home=tmp_path / "home",
+            platform="win32",
+        )
+        == (local_app_data / "Xaerospace").resolve()
+    )
+
+
+def test_environment_python_uses_native_conda_layout(tmp_path):
+    environment = tmp_path / "env"
+
+    assert environment_python(environment, platform="linux") == (
+        environment / "bin" / "python"
+    )
+    assert environment_python(environment, platform="darwin") == (
+        environment / "bin" / "python"
+    )
+    assert environment_python(environment, platform="win32") == (
+        environment / "python.exe"
+    )
+
+
 def test_source_checkout_keeps_compatible_local_tudat_runtime(tmp_path):
     module = _source_module(tmp_path)
     root = module.parents[2]
@@ -109,6 +171,22 @@ def test_installed_wheel_paths_never_target_site_packages(tmp_path):
     assert working_directory == data_root
     assert "site-packages" not in str(python)
     assert "site-packages" not in str(working_directory)
+
+
+def test_windows_tudat_runtime_uses_conda_root_python(tmp_path):
+    module = _installed_module(tmp_path)
+    local_app_data = tmp_path / "LocalAppData"
+    data_root = local_app_data / "Xaerospace"
+
+    python, runtime_home = default_tudat_runtime(
+        environ={"LOCALAPPDATA": str(local_app_data)},
+        home=tmp_path / "home",
+        platform="win32",
+        module_file=module,
+    )
+
+    assert python == data_root / "runtime" / "tudat" / "env" / "python.exe"
+    assert runtime_home == data_root / "runtime" / "tudat" / "home"
 
 
 def test_xaerospace_tudat_environment_overrides_are_supported(tmp_path):
@@ -163,5 +241,5 @@ def test_explicit_xaerospace_home_takes_precedence_over_checkout_runtime(tmp_pat
         module_file=module,
     )
 
-    assert python == data_root / "runtime" / "tudat" / "env" / "bin" / "python"
+    assert python == environment_python(data_root / "runtime" / "tudat" / "env")
     assert runtime_home == data_root / "runtime" / "tudat" / "home"

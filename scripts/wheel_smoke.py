@@ -20,9 +20,7 @@ def main() -> int:
     )
     parser.add_argument("wheel", type=Path)
     args = parser.parse_args()
-    wheel = args.wheel.resolve()
-    if not wheel.is_file():
-        raise RuntimeError(f"wheel does not exist: {wheel}")
+    wheel = _resolve_wheel(args.wheel)
 
     with tempfile.TemporaryDirectory(prefix="xaerospace-wheel-smoke-") as name:
         root = Path(name)
@@ -38,8 +36,10 @@ def main() -> int:
             ],
             check=True,
         )
-        python = environment / "bin" / "python"
-        adjacent_uv = Path(sys.executable).with_name("uv")
+        python = _environment_python(environment)
+        adjacent_uv = Path(sys.executable).with_name(
+            "uv.exe" if os.name == "nt" else "uv"
+        )
         uv = shutil.which("uv") or (str(adjacent_uv) if adjacent_uv.is_file() else None)
         if uv is None:
             raise RuntimeError("uv is required to install the wheel smoke target")
@@ -89,7 +89,7 @@ def main() -> int:
         raise RuntimeError("installed wheel served a corrupt artifact")
     if result["remaining_workflows"] != 0:
         raise RuntimeError("installed wheel did not persist workflow deletion")
-    if "site-packages" in result["tudat_python"]:
+    if "site-packages" in result["tudat_python"].lower():
         raise RuntimeError("installed wheel derives TudatPy under site-packages")
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
@@ -118,6 +118,22 @@ def _smoke_environment(data_root: Path) -> dict[str, str]:
     return environment
 
 
+def _environment_python(environment: Path) -> Path:
+    if os.name == "nt":
+        return environment / "Scripts" / "python.exe"
+    return environment / "bin" / "python"
+
+
+def _resolve_wheel(value: Path) -> Path:
+    direct = value.resolve()
+    if direct.is_file():
+        return direct
+    matches = sorted(value.parent.resolve().glob(value.name))
+    if len(matches) != 1:
+        raise RuntimeError(f"wheel pattern must resolve to exactly one file: {value}")
+    return matches[0]
+
+
 SMOKE_PROGRAM = r"""
 import json
 import os
@@ -130,6 +146,7 @@ assert not data_root.exists()
 
 import aerospace_simulator
 from aerospace_simulator.cli import _bundled_resource, build_parser
+from aerospace_simulator.tudat_setup import _configuration_directory
 from aerospace_simulator.tudat_runtime import runtime_paths
 from aerospace_simulator.web_api import create_app
 from fastapi.testclient import TestClient
@@ -141,8 +158,14 @@ assert "site-packages" in str(package_path), package_path
 assert build_parser().parse_args(["web", "--no-browser"]).port == 8000
 assert build_parser().parse_args(["setup-tudatpy"]).command == "setup-tudatpy"
 scenarios = _bundled_resource("scenarios")
-setup_script = _bundled_resource("scripts", "setup_tudatpy_macos_arm64.sh")
-assert setup_script.is_file()
+lock_files = [
+    _bundled_resource("config", "tudatpy-linux-64-lock.txt"),
+    _bundled_resource("config", "tudatpy-macos-arm64-lock.txt"),
+    _bundled_resource("config", "tudatpy-win-64-lock.txt"),
+]
+assert all(path.is_file() for path in lock_files)
+setup_config = _configuration_directory()
+assert all((setup_config / path.name).is_file() for path in lock_files)
 
 first_app = create_app()
 with TestClient(first_app) as client:

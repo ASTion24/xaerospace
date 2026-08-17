@@ -20,8 +20,9 @@ REQUIRED_WHEEL_SUFFIXES = (
     "aerospace_simulator/_version.py",
     "aerospace_simulator/parameter_definitions.json",
     "share/xaerospace/config/providers.example.json",
+    "share/xaerospace/config/tudatpy-linux-64-lock.txt",
     "share/xaerospace/config/tudatpy-macos-arm64-lock.txt",
-    "share/xaerospace/scripts/setup_tudatpy_macos_arm64.sh",
+    "share/xaerospace/config/tudatpy-win-64-lock.txt",
     "share/xaerospace/web/app.js",
     "share/xaerospace/web/i18n.js",
     "share/xaerospace/web/index.html",
@@ -90,7 +91,7 @@ def _run(command: list[str], *, env: dict[str, str] | None = None) -> None:
 
 
 def _build_wheel(destination: Path) -> Path:
-    adjacent_uv = Path(sys.executable).with_name("uv")
+    adjacent_uv = Path(sys.executable).with_name("uv.exe" if os.name == "nt" else "uv")
     uv = shutil.which("uv") or (str(adjacent_uv) if adjacent_uv.is_file() else None)
     if uv is None:
         raise RuntimeError("uv is required to build the release wheel")

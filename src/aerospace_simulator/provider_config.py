@@ -17,11 +17,12 @@ from pydantic import (
     model_validator,
 )
 
+from .paths import user_config_root
+
 PROVIDER_CONFIG_SCHEMA_VERSION = 1
 PROVIDER_CONFIG_ENV = "XAEROSPACE_PROVIDER_CONFIG"
 PROVIDER_PROFILE_ENV = "XAEROSPACE_PROVIDER_PROFILE"
 DEFAULT_LOCAL_PROVIDER_CONFIG = Path("config/providers.local.json")
-USER_PROVIDER_CONFIG = Path.home() / ".config/xaerospace/providers.local.json"
 _MAX_CONFIG_BYTES = 1_000_000
 _ENVIRONMENT_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 _PROFILE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$")
@@ -278,7 +279,7 @@ def discover_local_provider_config(
     ]
     if project_root is not None:
         candidates.append(project_root / DEFAULT_LOCAL_PROVIDER_CONFIG)
-    candidates.append(home_config or USER_PROVIDER_CONFIG)
+    candidates.append(home_config or user_config_root() / "providers.local.json")
     for candidate in candidates:
         if candidate.is_file():
             return candidate.resolve()

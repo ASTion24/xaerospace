@@ -4,7 +4,6 @@ import argparse
 import asyncio
 import json
 import os
-import subprocess
 import sys
 import sysconfig
 import threading
@@ -27,7 +26,7 @@ from .orbit_backend import (
     TudatPyExecutionError,
 )
 from .outputs import write_outputs
-from .paths import RUN_DIR_ENV, XAEROSPACE_HOME_ENV, source_project_root
+from .paths import RUN_DIR_ENV, source_project_root
 from .protocol import ProtocolValidationError
 from .provider_config import (
     PROVIDER_CONFIG_ENV,
@@ -41,6 +40,7 @@ from .simulation import (
     SimulationExecutionError,
     run_request,
 )
+from .tudat_setup import TudatSetupError, install_tudat_runtime
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -79,7 +79,10 @@ def build_parser() -> argparse.ArgumentParser:
     _add_provider_arguments(web_parser)
     setup_parser = subparsers.add_parser(
         "setup-tudatpy",
-        help="Install the pinned TudatPy runtime on macOS arm64.",
+        help=(
+            "Install the pinned TudatPy runtime on macOS arm64, "
+            "Linux x86_64, or Windows x86_64."
+        ),
     )
     setup_parser.add_argument(
         "--data-dir",
@@ -241,19 +244,16 @@ def _run_web(args: argparse.Namespace) -> int:
 
 
 def _run_tudatpy_setup(args: argparse.Namespace) -> int:
-    setup_script = _bundled_resource(
-        "scripts",
-        "setup_tudatpy_macos_arm64.sh",
-    )
-    environment = os.environ.copy()
-    if args.data_dir is not None:
-        environment[XAEROSPACE_HOME_ENV] = str(args.data_dir.expanduser().resolve())
-    completed = subprocess.run(
-        ["/bin/bash", str(setup_script)],
-        check=False,
-        env=environment,
-    )
-    return completed.returncode
+    try:
+        python_executable, runtime_home = install_tudat_runtime(
+            data_root=args.data_dir,
+        )
+    except TudatSetupError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
+    print(f"TudatPy runtime: {python_executable.parent}")
+    print(f"TudatPy resources: {runtime_home / '.tudat' / 'resource'}")
+    return 0
 
 
 def _run_assistant_evaluation(args: argparse.Namespace) -> int:

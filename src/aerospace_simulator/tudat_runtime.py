@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Mapping
 from pathlib import Path
 
 from .paths import default_tudat_runtime, runtime_working_directory
@@ -25,6 +26,19 @@ def project_root() -> Path:
 
 def runtime_paths() -> tuple[Path, Path]:
     return default_tudat_runtime(environ=os.environ, module_file=__file__)
+
+
+def runtime_environment(
+    runtime_home: Path,
+    *,
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    environment = dict(os.environ if environ is None else environ)
+    environment["HOME"] = str(runtime_home)
+    environment["PYTHONNOUSERSITE"] = "1"
+    if os.name == "nt":
+        environment["USERPROFILE"] = str(runtime_home)
+    return environment
 
 
 def validate_runtime(python_executable: Path, runtime_home: Path) -> None:
