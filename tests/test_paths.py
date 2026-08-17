@@ -241,5 +241,5 @@ def test_explicit_xaerospace_home_takes_precedence_over_checkout_runtime(tmp_pat
         module_file=module,
     )
 
-    assert python == data_root / "runtime" / "tudat" / "env" / "bin" / "python"
+    assert python == environment_python(data_root / "runtime" / "tudat" / "env")
     assert runtime_home == data_root / "runtime" / "tudat" / "home"
