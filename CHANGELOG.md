@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Added native user-data, Provider-config, virtual-environment, and executable
+  path handling for Linux x86_64 and Windows x86_64.
+- Replaced the macOS-only TudatPy Bash setup with a checksum-pinned Python
+  installer for macOS arm64, Linux x86_64, and Windows x86_64.
+- Added explicit TudatPy 1.0.0 Conda locks for Linux and Windows.
+- Expanded CI to test Linux and Windows on Python 3.10-3.12 and to execute the
+  complete four-backend physics gate on Python 3.12 for all supported systems.
+- Made release-wheel construction and installed-wheel smoke tests portable
+  across POSIX and Windows virtual-environment layouts.
+
 ## 0.2.2
 
 - Removed all pre-release compatibility aliases and standardized runtime

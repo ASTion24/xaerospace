@@ -34,6 +34,7 @@ from .tudat_runtime import (
     TUDATPY_VERSION,
     TudatRuntimeUnavailableError,
     project_root,
+    runtime_environment,
     runtime_paths,
     validate_runtime,
 )
@@ -110,11 +111,7 @@ def _run_worker(config: OrbitPropagationConfig) -> dict[str, Any]:
         "dynamics": config.dynamics,
         "contract": config.protocol_document(),
     }
-    environment = {
-        **os.environ,
-        "HOME": str(runtime_home),
-        "PYTHONNOUSERSITE": "1",
-    }
+    environment = runtime_environment(runtime_home, environ=os.environ)
     try:
         completed = subprocess.run(
             [str(python_executable), str(worker_path)],

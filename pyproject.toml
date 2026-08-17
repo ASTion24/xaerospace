@@ -52,11 +52,12 @@ aerospace_simulator = ["parameter_definitions.json"]
 [tool.setuptools.data-files]
 "share/xaerospace/config" = [
     "config/providers.example.json",
+    "config/tudatpy-linux-64-lock.txt",
     "config/tudatpy-macos-arm64-lock.txt",
+    "config/tudatpy-win-64-lock.txt",
 ]
 "share/xaerospace/evaluation" = ["evaluation/*.json"]
 "share/xaerospace/scenarios" = ["scenarios/*.json"]
-"share/xaerospace/scripts" = ["scripts/setup_tudatpy_macos_arm64.sh"]
 "share/xaerospace/web" = [
     "web/*.css",
     "web/*.html",

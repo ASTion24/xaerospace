@@ -11,6 +11,14 @@ TUDATPY_PYTHON_ENV = "XAEROSPACE_TUDATPY_PYTHON"
 TUDAT_HOME_ENV = "XAEROSPACE_TUDAT_HOME"
 
 
+def _platform_name(value: str | None) -> str:
+    return value or sys.platform
+
+
+def _is_windows(value: str | None) -> bool:
+    return _platform_name(value).startswith("win")
+
+
 def source_project_root(module_file: str | Path | None = None) -> Path | None:
     package_file = Path(module_file or __file__).resolve()
     candidate = package_file.parents[2]
@@ -33,14 +41,54 @@ def user_data_root(
         return Path(configured).expanduser().resolve()
 
     user_home = (home or Path.home()).expanduser()
-    current_platform = platform or sys.platform
+    current_platform = _platform_name(platform)
     if current_platform == "darwin":
         return user_home / "Library" / "Application Support" / "Xaerospace"
+    if _is_windows(current_platform):
+        local_app_data = environment.get("LOCALAPPDATA", "").strip()
+        if local_app_data:
+            return Path(local_app_data).expanduser().resolve() / "Xaerospace"
+        app_data = environment.get("APPDATA", "").strip()
+        if app_data:
+            return Path(app_data).expanduser().resolve() / "Xaerospace"
+        return user_home / "AppData" / "Local" / "Xaerospace"
 
     xdg_data_home = environment.get("XDG_DATA_HOME", "").strip()
     if xdg_data_home:
         return Path(xdg_data_home).expanduser().resolve() / "xaerospace"
     return user_home / ".local" / "share" / "xaerospace"
+
+
+def user_config_root(
+    *,
+    environ: Mapping[str, str] | None = None,
+    home: Path | None = None,
+    platform: str | None = None,
+) -> Path:
+    environment = os.environ if environ is None else environ
+    user_home = (home or Path.home()).expanduser()
+    current_platform = _platform_name(platform)
+    if current_platform == "darwin":
+        return user_home / "Library" / "Application Support" / "Xaerospace"
+    if _is_windows(current_platform):
+        local_app_data = environment.get("LOCALAPPDATA", "").strip()
+        if local_app_data:
+            return Path(local_app_data).expanduser().resolve() / "Xaerospace"
+        app_data = environment.get("APPDATA", "").strip()
+        if app_data:
+            return Path(app_data).expanduser().resolve() / "Xaerospace"
+        return user_home / "AppData" / "Local" / "Xaerospace"
+
+    xdg_config_home = environment.get("XDG_CONFIG_HOME", "").strip()
+    if xdg_config_home:
+        return Path(xdg_config_home).expanduser().resolve() / "xaerospace"
+    return user_home / ".config" / "xaerospace"
+
+
+def environment_python(environment_root: Path, *, platform: str | None = None) -> Path:
+    if _is_windows(platform):
+        return environment_root / "python.exe"
+    return environment_root / "bin" / "python"
 
 
 def default_runs_root(
@@ -77,7 +125,7 @@ def default_tudat_runtime(
 
     source_root = source_project_root(module_file)
     checkout_python = (
-        source_root / ".tudat-env" / "bin" / "python"
+        environment_python(source_root / ".tudat-env", platform=platform)
         if source_root is not None
         else None
     )
@@ -98,7 +146,7 @@ def default_tudat_runtime(
             and checkout_python is not None
             and checkout_python.is_file()
         )
-        else runtime_root / "env" / "bin" / "python"
+        else environment_python(runtime_root / "env", platform=platform)
     )
     runtime_home = (
         Path(home_override).expanduser().resolve()

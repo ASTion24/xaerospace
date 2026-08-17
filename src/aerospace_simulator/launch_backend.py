@@ -24,6 +24,7 @@ from .tudat_runtime import (
     TUDATPY_VERSION,
     TudatRuntimeUnavailableError,
     project_root,
+    runtime_environment,
     runtime_paths,
     validate_runtime,
 )
@@ -62,11 +63,7 @@ def _run_worker(config: LaunchToOrbitConfig) -> dict[str, Any]:
     except TudatRuntimeUnavailableError as exc:
         raise TudatLaunchExecutionError(str(exc)) from exc
     worker_path = Path(__file__).with_name("tudat_launch_worker.py")
-    environment = {
-        **os.environ,
-        "HOME": str(runtime_home),
-        "PYTHONNOUSERSITE": "1",
-    }
+    environment = runtime_environment(runtime_home, environ=os.environ)
     payload = {
         "dynamics": config.dynamics,
         "contract": config.protocol_document(),

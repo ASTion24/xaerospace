@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 from aerospace_simulator import __version__
-from aerospace_simulator.cli import _run_web, build_parser
+from aerospace_simulator.cli import _run_tudatpy_setup, _run_web, build_parser
 
 
 @pytest.mark.parametrize("host", ["127.0.0.1", "localhost", "::1"])
@@ -53,3 +53,19 @@ def test_web_command_uses_application_factory(monkeypatch):
             },
         )
     ]
+
+
+def test_tudat_setup_command_uses_cross_platform_installer(tmp_path, monkeypatch):
+    calls = []
+    runtime_python = tmp_path / "runtime" / "env" / "python"
+    runtime_home = tmp_path / "runtime" / "home"
+    monkeypatch.setattr(
+        "aerospace_simulator.cli.install_tudat_runtime",
+        lambda **options: calls.append(options) or (runtime_python, runtime_home),
+    )
+    args = build_parser().parse_args(
+        ["setup-tudatpy", "--data-dir", str(tmp_path / "data")]
+    )
+
+    assert _run_tudatpy_setup(args) == 0
+    assert calls == [{"data_root": tmp_path / "data"}]
