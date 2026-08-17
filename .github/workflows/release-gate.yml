@@ -90,7 +90,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 120
     env:
-      XAEROSPACE_HOME: ${{ runner.temp }}/xaerospace-home
+      XAEROSPACE_HOME: ${{ github.workspace }}/.xaerospace-ci-home
     steps:
       - uses: actions/checkout@v4
 
