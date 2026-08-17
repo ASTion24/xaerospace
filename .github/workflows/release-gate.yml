@@ -80,9 +80,21 @@ jobs:
           uv build --wheel --out-dir dist
           uv run python scripts/wheel_smoke.py dist/xaerospace-*.whl
 
+  quality-gate:
+    name: Quality and wheel smoke
+    needs: quality
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify quality matrix
+        env:
+          MATRIX_RESULT: ${{ needs.quality.result }}
+        run: test "$MATRIX_RESULT" = "success"
+
   full-physics:
     name: Four-backend physics gate (${{ matrix.os }})
-    needs: quality
+    needs: quality-gate
     strategy:
       fail-fast: false
       matrix:
@@ -117,3 +129,15 @@ jobs:
         env:
           XAEROSPACE_HOME: ${{ runner.temp }}/xaerospace-home
         run: uv run python scripts/release_gate.py
+
+  full-physics-gate:
+    name: Four-backend physics gate
+    needs: full-physics
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Verify physics matrix
+        env:
+          MATRIX_RESULT: ${{ needs.full-physics.result }}
+        run: test "$MATRIX_RESULT" = "success"
